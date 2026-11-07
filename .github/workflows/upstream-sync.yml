@@ -1,0 +1,52 @@
+name: Upstream Sync 24/7 (Basecamp Omarchy)
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 04:00 AM UTC (medianoche hora Colombia/Ecuador/Perú)
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Permite ejecutar manualmente con un solo clic desde GitHub Actions
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    name: Sincronizar con Basecamp Upstream
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repositorio Completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Identidad Git
+        run: |
+          git config user.name "X64 Automation Bot"
+          git config user.email "bot@x64studios.com"
+
+      - name: Configurar Remotos y Ramas
+        run: |
+          if ! git remote get-url upstream >/dev/null 2>&1; then
+            git remote add upstream https://github.com/basecamp/omarchy.git
+          fi
+          # Asegurar que ambas ramas existen localmente
+          git checkout upstream || git checkout -b upstream origin/upstream
+          git checkout main
+
+      - name: Ejecutar Motor de Sincronización Blindado X64
+        id: sync_run
+        run: |
+          chmod +x bin/x64-sync-upstream.sh
+          ./bin/x64-sync-upstream.sh
+
+      - name: Notificar si se requiere intervención técnica
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "🚨 [Sync Alert] Basecamp introdujo cambios que requieren revisión técnica" \
+            --body "El motor de sincronización automático detectó una actualización en Basecamp (quattro) que requiere atención para mantener la integridad de la Capa Overlay X64. La rama 'main' de producción se mantuvo intacta y segura." \
+            --label "sync-alert" || echo "No se pudo abrir el issue, ver logs de la acción."
