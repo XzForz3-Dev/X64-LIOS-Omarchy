@@ -1,77 +1,54 @@
-# Omarchy
+<div align="center">
+  <img src="https://raw.githubusercontent.com/XzForz3-Dev/X64-LIOS-Omarchy/main/logo.txt" alt="X64 LIOS Logo" width="100%">
+  
+  # X64 LIOS + Omarchy
+  *El entorno de escritorio insignia (Flagship Shell) oficial de X64 LIOS para Gaming, Desarrollo y Ciberseguridad.*
 
-Omarchy is a beautiful, fun & agentic Linux distribution by DHH.
+  [![Base: X64 LIOS](https://img.shields.io/badge/Base-X64_LIOS-00ffff?style=for-the-badge&logo=archlinux)](https://x64lios.com)
+  [![Upstream: Omarchy](https://img.shields.io/badge/Upstream-Basecamp_Omarchy-ff007f?style=for-the-badge)](https://omarchy.org)
+  [![Compositor: Hyprland](https://img.shields.io/badge/Compositor-Hyprland-00a86b?style=for-the-badge&logo=hyprland)](https://hyprland.org/)
+  [![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-blue?style=for-the-badge)](LICENSE)
+</div>
 
-Read more at [omarchy.org](https://omarchy.org).
+<br>
 
-## The Omarchy Manual
+**X64 LIOS + Omarchy** es la unión definitiva entre la estética vanguardista y agentic de [Omarchy](https://omarchy.org) (creado originalmente por Basecamp / DHH) y la potencia de bajo nivel de **X64 LIOS**.
 
-The manual lives in [`manual/`](manual/), which is its authoritative source.
+Diseñado como un entorno de escritorio puro (*Desktop Shell*) desacoplado, corre de forma nativa sobre el kernel BORE optimizado de X64 LIOS, sincronizándose continuamente con upstream sin alterar la estabilidad del sistema base.
 
-- [Welcome to Omarchy!](manual/01-welcome-to-omarchy.md)
+---
 
-**The Basics**
+## ⚡ Características Principales
 
-- [Getting Started](manual/02-getting-started.md)
-- [Coming From Mac or Windows](manual/03-coming-from-mac-or-windows.md)
-- [Navigation](manual/04-navigation.md)
-- [The top bar](manual/05-the-top-bar.md)
-- [Themes](manual/06-themes.md)
-- [Hotkeys](manual/07-hotkeys.md)
-- [Unified Clipboard & History](manual/08-unified-clipboard-history.md)
-- [Reminders](manual/09-reminders.md)
-- [Notices](manual/10-notices.md)
-- [Text Extraction & Dictation](manual/11-text-extraction-dictation.md)
-- [Screenshots & Recording](manual/12-screenshots-recording.md)
-- [Toggles, idle & screensaver](manual/13-toggles-idle-screensaver.md)
-- [Omarchy CLI](manual/14-omarchy-cli.md)
+* 🎮 **Rendimiento Máximo:** Optimizado para interactuar fluidamente con el kernel BORE de X64 LIOS y compatibilidad con drivers gráficos dedicados y de alta tasa de refresco.
+* 🎨 **Temas X64 Studios:** Incluye temas Cyberpunk, Matrix, Vaporwave, Crimson y Tokyo Night adaptados para Quickshell, terminal `foot` y Wayland.
+* 🌐 **Traducción Oficial al Español:** Interfaz completamente localizada al español para toda la comunidad hispanohablante.
+* 🖥️ **Terminal Premium (Overhaul):**
+  * Emulador `foot` ultra-rápido en Wayland.
+  * Prompt enriquecido con Starship personalizado de X64 Studios.
+  * Telemetría visual con `fastfetch` y logo ASCII nativo.
+* 🔄 **Sincronización Continua Blindada:** Pipeline automatizado que recibe novedades y herramientas diarias de Basecamp filtrando paquetes que comprometan el sistema.
 
-**The Applications**
+---
 
-- [Terminal](manual/15-terminal.md)
-- [Neovim](manual/16-neovim.md)
-- [AI](manual/17-ai.md)
-- [Development Tools](manual/18-development-tools.md)
-- [Shell Tools](manual/19-shell-tools.md)
-- [Shell Functions](manual/20-shell-functions.md)
-- [TUIs](manual/21-tuis.md)
-- [GUIs](manual/22-guis.md)
-- [Browsers](manual/23-browsers.md)
-- [Commercial apps/services](manual/24-commercial-apps-services.md)
-- [Web Apps](manual/25-web-apps.md)
-- [Gaming](manual/26-gaming.md)
-- [Filling out PDFs](manual/27-filling-out-pdfs.md)
-- [Windows VM](manual/28-windows-vm.md)
-- [Other Packages](manual/29-other-packages.md)
+## 🚀 Integración en X64 LIOS
 
-**Configuration**
+Este entorno no requiere clonación manual ni scripts invasivos:
 
-- [Updates](manual/30-updates.md)
-- [Dotfiles](manual/31-dotfiles.md)
-- [Shell plugins](manual/32-shell-plugins.md)
-- [Monitors](manual/33-monitors.md)
-- [Keyboard, Mouse, Trackpad](manual/34-keyboard-mouse-trackpad.md)
-- [Networking](manual/35-networking.md)
-- [System sleep](manual/36-system-sleep.md)
-- [Hardware authentication](manual/37-hardware-authentication.md)
-- [Fonts](manual/38-fonts.md)
-- [Backgrounds](manual/39-backgrounds.md)
-- [Prompt](manual/40-prompt.md)
-- [Branding](manual/41-branding.md)
-- [Common tweaks](manual/42-common-tweaks.md)
-- [Making your own theme](manual/43-making-your-own-theme.md)
+1. **Desde el Instalador de la ISO (Calamares):**  
+   Durante la instalación de X64 LIOS, selecciona **"X64 LIOS + Omarchy (Edición Flagship Cyberpunk)"** en la pantalla de selección de entornos.
+2. **Desde la TTY (`x64-dashboard`):**  
+   Si instalaste la edición *Modo sin escritorio (CLI)* o deseas cambiar de sesión:
+   ```bash
+   x64-dashboard
+   ```
+   Selecciona `[1] Iniciar X64 LIOS + Omarchy` o `[2] Actualizar X64 LIOS + Omarchy`.
 
-**The Rest**
+---
 
-- [Mac support](manual/44-mac-support.md)
-- [Troubleshooting](manual/45-troubleshooting.md)
-- [FAQ](manual/46-faq.md)
-- [System snapshots](manual/47-system-snapshots.md)
-- [Security](manual/48-security.md)
-- [Omarchy on...](manual/49-omarchy-on.md)
-- [Dual Boot Install](manual/50-dual-boot-install.md)
-- [Unattended Installs](manual/51-unattended-installs.md)
+## 📜 Créditos y Reconocimientos
 
-## License
-
-Omarchy is released under the [MIT License](https://opensource.org/licenses/MIT).
+* Al equipo de **[Basecamp (37signals)](https://github.com/basecamp/omarchy)** y a David Heinemeier Hansson (DHH) por la arquitectura original de Omarchy.
+* Al equipo de **[CachyOS](https://cachyos.org)** por las optimizaciones de compilación y el kernel BORE.
+* A la comunidad y desarrolladores de **[Hyprland](https://hyprland.org)** y **[Quickshell](https://quickshell.outfoxxed.me/)**.
+* **X64 Studios**: Arquitectura, integración soberana, traducciones y temas.

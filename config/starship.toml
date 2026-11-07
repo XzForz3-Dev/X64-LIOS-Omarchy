@@ -1,32 +1,64 @@
-add_newline = true
-command_timeout = 200
-format = "[$directory$git_branch$git_status]($style)$character"
+# X64 LIOS PRO Terminal - Starship Configuration
+"$schema" = 'https://starship.rs/config-schema.json'
 
-[character]
-error_symbol = "[✗](bold cyan)"
-success_symbol = "[❯](bold cyan)"
+add_newline = true
+command_timeout = 1000
+
+format = """
+[┌─](bold cyan) [$os](bold cyan)[$username](bold cyan)[@](bold cyan)[$hostname](bold cyan) [](cyan) [$directory](bold blue) [$git_branch$git_status](bold purple)
+[└─](bold cyan)$character """
+
+[os]
+disabled = false
+format = "[$symbol]($style)"
+
+[os.symbols]
+Arch = "󰣇 "
+CachyOS = "󰣇 "
+Linux = "󰌽 "
+Unknown = "󰌽 "
+
+[username]
+style_user = "bold cyan"
+style_root = "bold red"
+format = "[$user]($style)"
+show_always = false
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style)"
+disabled = false
 
 [directory]
-truncation_length = 2
+style = "bold blue"
+truncation_length = 4
 truncation_symbol = "…/"
-repo_root_style = "bold cyan"
-repo_root_format = "[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) "
+read_only = " 󰌾"
 
 [git_branch]
-format = "[$branch]($style) "
-style = "italic cyan"
+symbol = " "
+style = "bold purple"
+format = "[$symbol$branch]($style) "
 
 [git_status]
-format     = '[$all_status]($style)'
-style      = "cyan"
-ahead      = "⇡${count} "
-diverged   = "⇕⇡${ahead_count}⇣${behind_count} "
-behind     = "⇣${count} "
-conflicted = " "
-up_to_date = " "
-untracked  = "? "
-modified   = " "
-stashed    = ""
-staged     = ""
-renamed    = ""
-deleted    = ""
+format = '([$all_status$ahead_behind]($style) )'
+style = "bold red"
+conflicted = "🏳 "
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "🤷 "
+stashed = "📦 "
+modified = "📝 "
+staged = "[++\\($count\\)](green) "
+renamed = "👅 "
+deleted = "🗑 "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[✗](bold red)"
+vimcmd_symbol = "[❮](bold yellow)"
+
+[cmd_duration]
+min_time = 500
+format = " [󱎫 $duration](bold yellow)"

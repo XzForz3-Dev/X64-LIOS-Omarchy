@@ -1,0 +1,9 @@
+#!/bin/bash
+source omarchy-restart-gum
+cmd="$*"
+presentation_script="omarchy-show-logo; $cmd; if (( \$? != 130 )); then omarchy-show-done; fi"
+
+# Usamos foot directamente con app-id org.x64.boutique para que Hyprland
+# NO aplique las reglas de flotación de org.omarchy.terminal y abra en Tiling.
+# El fix de /dev/tty en x64-install.py protege a Python contra BlockingIOError.
+exec setsid uwsm-app -- foot -a org.x64.boutique -T "X64 Boutique" bash -c "$presentation_script"
