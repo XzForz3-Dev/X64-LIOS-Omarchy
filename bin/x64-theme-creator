@@ -1,3 +1,0 @@
-#!/bin/bash
-export OMARCHY_PATH=/usr/share/omarchy
-exec python3 $OMARCHY_PATH/bin/x64-theme-creator-app

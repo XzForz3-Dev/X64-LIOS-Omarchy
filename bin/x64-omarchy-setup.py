@@ -165,7 +165,7 @@ def setup_environment_and_wrappers():
             full_path = os.path.join(bin_dir, entry)
             if not os.path.isfile(full_path) or not os.access(full_path, os.X_OK):
                 continue
-            if entry == "kitty":
+            if entry in ["kitty", "x64-update", "x64-update-tray", "x64-dashboard"] or entry.endswith(".py") or entry.endswith(".sh"):
                 continue
             
             target_wrapper = os.path.join("/usr/local/bin", entry)

@@ -1,9 +1,0 @@
-#!/bin/bash
-# X64 Studios Edition Updater
-
-echo -e "\e[1;36m[X64 Studios] Buscando actualizaciones de diseño...\e[0m"
-
-# URL raw del repositorio de X64 Studios (rama quattro)
-REPO_URL="https://raw.githubusercontent.com/XzForz3-Dev/X64-Omarchy-CachyOS/quattro"
-
-echo -e "\e[1;32m[OK] Entorno X64 Studios actualizado exitosamente.\e[0m"
