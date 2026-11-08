@@ -50,3 +50,4 @@ jobs:
             --title "🚨 [Sync Alert] Basecamp introdujo cambios que requieren revisión técnica" \
             --body "El motor de sincronización automático detectó una actualización en Basecamp (quattro) que requiere atención para mantener la integridad de la Capa Overlay X64. La rama 'main' de producción se mantuvo intacta y segura." \
             --label "sync-alert" || echo "No se pudo abrir el issue, ver logs de la acción."
+
