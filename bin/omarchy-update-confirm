@@ -32,7 +32,7 @@ echo ""
 echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
 echo ""
 
-if ! gum confirm "¿Deseas iniciar la actualización completa de X64 LIOS?" \
+if ! gum confirm "  ¿Deseas iniciar la actualización completa de X64 LIOS?" \
   --prompt.foreground 196 \
   --affirmative "  [ SÍ, CONTINUAR ]  " \
   --negative "  [ CANCELAR ]  " \
