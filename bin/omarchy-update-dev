@@ -13,13 +13,19 @@ fi
 git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
 if (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
   sudo -u "$SUDO_USER" git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
+else
+  sudo git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
 fi
 
 repo_owner=$(stat -c '%U' "$OMARCHY_PATH/.git" 2>/dev/null || stat -c '%U' "$OMARCHY_PATH" 2>/dev/null || echo "root")
 
 _git() {
   if [[ "$repo_owner" == "root" ]]; then
-    git -C "$OMARCHY_PATH" "$@"
+    if (( EUID == 0 )); then
+      git -C "$OMARCHY_PATH" "$@"
+    else
+      sudo git -C "$OMARCHY_PATH" "$@"
+    fi
   elif (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
     sudo -u "$SUDO_USER" git -C "$OMARCHY_PATH" "$@"
   else
