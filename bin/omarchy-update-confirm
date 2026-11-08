@@ -2,20 +2,44 @@
 
 # omarchy:summary=Prompt for confirmation before starting an update
 
-gum style --border normal --padding "1 2" \
-  "🚀 ¿Listo para actualizar X64 LIOS?" \
-  "" \
-  "✨ Últimas versiones Rolling Release de CachyOS y Arch Linux." \
-  "✨ Novedades y parches oficiales de X64 LIOS + Omarchy." \
-  "" \
-  "⚠️  No interrumpas el proceso una vez iniciado." \
-  "⚡ Asegúrate de estar conectado a la corriente."
+border="\033[1;31m"
+reset="\033[0m"
+title="\033[1;37m"
+val="\033[0;37m"
+cyan="\033[1;36m"
+warn="\033[1;33m"
+green="\033[1;32m"
 
-echo
+kernel_ver=$(uname -r 2>/dev/null || echo "Linux")
+current_time=$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date)
 
-if ! gum confirm "¿Iniciar proceso de actualización del sistema?" \
-  --affirmative "Sí, continuar" \
-  --negative "Cancelar"; then
-  echo "Actualización cancelada por el usuario."
+echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
+echo -e "   ${title}CENTRO DE ACTUALIZACIÓN DEL SISTEMA${reset}"
+echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
+printf "    ${cyan}%-12s${reset} ${val}%-24s${reset} ${cyan}%-10s${reset} ${val}%-24s${reset}\n" "[SISTEMA]" "X64 LIOS Linux" "[KERNEL]" "$kernel_ver"
+printf "    ${cyan}%-12s${reset} ${val}%-24s${reset} ${cyan}%-10s${reset} ${val}%-24s${reset}\n" "[CANAL]" "Rolling Release" "[FECHA]" "$current_time"
+echo ""
+echo -e "    ${green}[✓]${reset} ${val}Sincronización de repositorios oficiales CachyOS y Arch Linux.${reset}"
+echo -e "    ${green}[✓]${reset} ${val}Actualizaciones y parches oficiales de X64 LIOS + Omarchy.${reset}"
+echo -e "    ${green}[✓]${reset} ${val}Creación automática de instantánea Snapper Btrfs para recuperación.${reset}"
+echo ""
+echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
+echo -e "   ${title}ADVERTENCIAS IMPORTANTES${reset}"
+echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
+echo -e "    ${warn}[!]${reset} ${val}No apagues ni reinicies el equipo durante el proceso de instalación.${reset}"
+echo -e "    ${warn}[!]${reset} ${val}Asegúrate de contar con conexión a Internet y batería suficiente.${reset}"
+echo ""
+echo -e "  ${border}─────────────────────────────────────────────────────────────────────────────${reset}"
+echo ""
+
+if ! gum confirm "¿Deseas iniciar la actualización completa de X64 LIOS?" \
+  --prompt.foreground 196 \
+  --affirmative "  [ SÍ, CONTINUAR ]  " \
+  --negative "  [ CANCELAR ]  " \
+  --selected.background 196 \
+  --selected.foreground 255 \
+  --unselected.background 235 \
+  --unselected.foreground 250; then
+  echo -e "\n  \033[1;33m[i] Actualización cancelada por el usuario.\033[0m\n"
   exit 1
 fi

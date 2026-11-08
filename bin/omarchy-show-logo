@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# omarchy:summary=Display the X64 LIOS logo in the terminal using green color.
+# omarchy:summary=Display the official X64 LIOS logo in the terminal matching x64-dashboard
 
 clear
-echo -e "\033[32m"
-cat <"$OMARCHY_PATH/logo.txt"
-echo -e "\033[0m"
-echo
+echo ""
+echo -e "\033[1;31m    ██╗  ██╗ ██████╗ ██╗  ██╗    ██╗     ██╗ ██████╗ ███████╗\033[0m"
+echo -e "\033[1;31m    ╚██╗██╔╝██╔════╝ ██║  ██║    ██║     ██║██╔═══██╗██╔════╝\033[0m"
+echo -e "\033[1;31m     ╚███╔╝ ███████╗ ███████║    ██║     ██║██║   ██║███████╗\033[0m"
+echo -e "\033[1;31m     ██╔██╗ ██╔═══██╗╚════██║    ██║     ██║██║   ██║╚════██║\033[0m"
+echo -e "\033[1;31m    ██╔╝ ██╗╚██████╔╝     ██║    ███████╗██║╚██████╔╝███████║\033[0m"
+echo -e "\033[1;31m    ╚═╝  ╚═╝ ╚═════╝      ╚═╝    ╚══════╝╚═╝ ╚═════╝ ╚══════╝\033[0m"
+echo -e "          \033[1;37mS I S T E M A   O P E R A T I V O   R O L L I N G   R E L E A S E\033[0m\n"
