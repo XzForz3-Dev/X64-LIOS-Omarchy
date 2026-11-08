@@ -11,4 +11,8 @@ cmd="$*"
 # 130 is the user bailing with Ctrl-C; anything else gets the Done/Failed prompt.
 presentation_script="omarchy-show-logo; $cmd; code=\$?; if (( code != 130 )); then omarchy-show-done \$code; fi"
 
+if command -v foot >/dev/null 2>&1; then
+  exec setsid uwsm-app -- foot -a org.omarchy.terminal -T Omarchy bash -c "$presentation_script"
+fi
+
 exec setsid uwsm-app -- xdg-terminal-exec --app-id=org.omarchy.terminal --title=Omarchy -e bash -c "$presentation_script"
