@@ -13,8 +13,7 @@ gum style --border rounded --border-foreground 198 --padding "1 3" --margin "0 1
 
 echo
 
-if ! gum confirm \
-  --prompt "  ¿Iniciar proceso de actualización del sistema?" \
+if ! gum confirm "¿Iniciar proceso de actualización del sistema?" \
   --prompt.foreground 45 \
   --affirmative "  󰣇  Sí, iniciar actualización  " \
   --negative "  󰅚  Cancelar  " \
