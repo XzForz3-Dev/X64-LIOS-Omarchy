@@ -4,24 +4,38 @@
 
 set -euo pipefail
 
-[[ $OMARCHY_PATH != "/usr/share/omarchy" ]] || exit 0
-
 if ! git -C "$OMARCHY_PATH" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "Error: OMARCHY_PATH is not a git checkout: $OMARCHY_PATH" >&2
   exit 1
 fi
 
-upstream=$(git -C "$OMARCHY_PATH" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+# Ensure safe.directory is configured for root and user
+git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
+if (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
+  sudo -u "$SUDO_USER" git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
+fi
+
+_git() {
+  if (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
+    sudo -u "$SUDO_USER" git -C "$OMARCHY_PATH" "$@"
+  else
+    git -C "$OMARCHY_PATH" "$@"
+  fi
+}
+
+upstream=$(_git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
 if [[ -z $upstream ]]; then
-  echo -e "\e[33m\nSkip Omarchy dev checkout update (current branch has no upstream)\e[0m"
+  echo -e "\e[33m\nSkip Omarchy git update (current branch has no upstream)\e[0m"
   exit 0
 fi
 
-echo -e "\e[32m\nUpdate Omarchy dev checkout\e[0m"
-# A filtered fetch makes a full clone blobless once; git saves the filter, so
-# pulls then only fetch the file contents the new checkout needs.
-remote=$(git -C "$OMARCHY_PATH" for-each-ref --format='%(upstream:remotename)' "$(git -C "$OMARCHY_PATH" symbolic-ref -q HEAD)")
-if git -C "$OMARCHY_PATH" config "remote.$remote.url" >/dev/null && ! git -C "$OMARCHY_PATH" config "remote.$remote.promisor" >/dev/null; then
-  git -C "$OMARCHY_PATH" fetch --filter=blob:none "$remote"
+echo -e "\e[32m\nActualizando entorno X64 LIOS + Omarchy desde Git...\e[0m"
+
+# Fetch latest changes
+_git fetch --quiet || true
+
+# Pull fast-forward or autostash if user had local adjustments
+if ! _git merge --ff-only "@{upstream}" 2>/dev/null; then
+  echo -e "\e[33mDetectados ajustes locales. Aplicando autostash seguro...\e[0m"
+  _git pull --rebase --autostash || true
 fi
-git -C "$OMARCHY_PATH" pull --ff-only
