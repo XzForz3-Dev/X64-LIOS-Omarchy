@@ -15,8 +15,12 @@ if (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
   sudo -u "$SUDO_USER" git config --global --add safe.directory "$OMARCHY_PATH" 2>/dev/null || true
 fi
 
+repo_owner=$(stat -c '%U' "$OMARCHY_PATH/.git" 2>/dev/null || stat -c '%U' "$OMARCHY_PATH" 2>/dev/null || echo "root")
+
 _git() {
-  if (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
+  if [[ "$repo_owner" == "root" ]]; then
+    git -C "$OMARCHY_PATH" "$@"
+  elif (( EUID == 0 )) && [[ -n ${SUDO_USER:-} ]]; then
     sudo -u "$SUDO_USER" git -C "$OMARCHY_PATH" "$@"
   else
     git -C "$OMARCHY_PATH" "$@"
@@ -24,6 +28,10 @@ _git() {
 }
 
 upstream=$(_git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+if [[ -z $upstream ]] && _git rev-parse --verify origin/main >/dev/null 2>&1; then
+  upstream="origin/main"
+fi
+
 if [[ -z $upstream ]]; then
   echo -e "\e[33m\nSkip Omarchy git update (current branch has no upstream)\e[0m"
   exit 0

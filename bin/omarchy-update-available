@@ -7,16 +7,11 @@ set -euo pipefail
 updates=()
 
 if [[ -d "$OMARCHY_PATH/.git" ]]; then
-  upstream=$(git -C "$OMARCHY_PATH" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
-  if [[ -n $upstream ]]; then
-    GIT_TERMINAL_PROMPT=0 timeout 10 git -C "$OMARCHY_PATH" fetch --quiet 2>/dev/null || true
+  local_head=$(git -C "$OMARCHY_PATH" rev-parse HEAD 2>/dev/null || true)
+  remote_head=$(GIT_TERMINAL_PROMPT=0 timeout 10 git -C "$OMARCHY_PATH" ls-remote origin -h refs/heads/main 2>/dev/null | awk '{print $1}' || true)
 
-    behind=$(git -C "$OMARCHY_PATH" rev-list --count "HEAD..$upstream" 2>/dev/null || echo 0)
-    if (( behind > 0 )); then
-      commit_label=commits
-      (( behind == 1 )) && commit_label=commit
-      updates+=("omarchy-dev-checkout $behind new $commit_label on $upstream")
-    fi
+  if [[ -n ${remote_head:-} ]] && [[ -n ${local_head:-} ]] && [[ "$local_head" != "$remote_head" ]]; then
+    updates+=("X64 LIOS + Omarchy (actualización git disponible)")
   fi
 fi
 
