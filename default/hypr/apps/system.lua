@@ -10,9 +10,6 @@ o.window(
   }
 )
 
-o.window({ title = "^(Omarchy)$" }, { tag = "+floating-window", float = true, center = true, size = { 920, 620 } })
-o.window("org.omarchy.terminal", { float = true, center = true, size = { 920, 620 } })
-
 -- The portal only ever shows dialogs — file pickers, screen shares, permission
 -- prompts — so every one of its windows belongs in the floating treatment,
 -- whatever the app that asked for it titled it.

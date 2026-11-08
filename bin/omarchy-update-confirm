@@ -2,25 +2,20 @@
 
 # omarchy:summary=Prompt for confirmation before starting an update
 
-gum style --border rounded --border-foreground 198 --padding "1 3" --margin "0 1" \
+gum style --border normal --padding "1 2" \
   "🚀 ¿Listo para actualizar X64 LIOS?" \
   "" \
-  "  ✨ Últimas versiones Rolling Release de CachyOS y Arch Linux." \
-  "  ✨ Novedades y parches oficiales de X64 LIOS + Omarchy." \
+  "✨ Últimas versiones Rolling Release de CachyOS y Arch Linux." \
+  "✨ Novedades y parches oficiales de X64 LIOS + Omarchy." \
   "" \
-  "  ⚠️  No interrumpas el proceso una vez iniciado." \
-  "  ⚡ Asegúrate de estar conectado a la corriente."
+  "⚠️  No interrumpas el proceso una vez iniciado." \
+  "⚡ Asegúrate de estar conectado a la corriente."
 
 echo
 
 if ! gum confirm "¿Iniciar proceso de actualización del sistema?" \
-  --prompt.foreground 45 \
-  --affirmative "  󰣇  Sí, iniciar actualización  " \
-  --negative "  󰅚  Cancelar  " \
-  --selected.background 198 \
-  --selected.foreground 255 \
-  --unselected.background 236 \
-  --unselected.foreground 250; then
+  --affirmative "Sí, continuar" \
+  --negative "Cancelar"; then
   echo "Actualización cancelada por el usuario."
   exit 1
 fi
