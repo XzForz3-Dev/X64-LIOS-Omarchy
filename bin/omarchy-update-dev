@@ -33,8 +33,8 @@ _git() {
   fi
 }
 
-upstream=$(_git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
-if [[ -z $upstream ]] && _git rev-parse --verify origin/main >/dev/null 2>&1; then
+upstream=$(git -C "$OMARCHY_PATH" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+if [[ -z $upstream ]] && git -C "$OMARCHY_PATH" rev-parse --verify origin/main >/dev/null 2>&1; then
   upstream="origin/main"
 fi
 
