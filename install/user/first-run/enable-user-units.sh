@@ -26,8 +26,8 @@ for unit in \
   omarchy-migrate-notify.service \
   omarchy-fcitx5.service \
   omarchy-crash-watch.service; do
-  systemctl --user enable --now "$unit" || failed=1
+  systemctl --user enable --now "$unit" 2>/dev/null || true
 done
 
-omarchy-hook-install theme-set /usr/share/owe/10-owe-sync
-exit "$failed"
+[ -f /usr/share/owe/10-owe-sync ] && omarchy-hook-install theme-set /usr/share/owe/10-owe-sync || true
+exit 0
