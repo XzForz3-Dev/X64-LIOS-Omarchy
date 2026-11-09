@@ -1,72 +1,78 @@
 {
-  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {
-    "source": "/usr/share/omarchy/logo.txt",
-    "type": "file",
-    "color": {"1": "red"}
-  },
-  "display": {
-    "separator": " 󰁔 ",
-    "color": {
-      "keys": "red",
-      "title": "red"
-    }
-  },
-  "modules": [
-    "title",
-    "separator",
-    {
-      "type": "os",
-      "key": "╭─  OS",
-      "keyColor": "red"
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": "/usr/share/fastfetch/x64_logo.txt",
+        "color": {"1": "red"},
+        "padding": {
+            "top": 1,
+            "right": 4,
+            "left": 2
+        }
     },
-    {
-      "type": "kernel",
-      "key": "├─  Kernel",
-      "keyColor": "red"
+    "display": {
+        "separator": "  ",
+        "color": {
+            "keys": "red"
+        }
     },
-    {
-      "type": "packages",
-      "key": "├─ 󰏖 Pkgs",
-      "keyColor": "red"
-    },
-    {
-      "type": "shell",
-      "key": "├─  Shell",
-      "keyColor": "red"
-    },
-    {
-      "type": "wm",
-      "key": "├─  WM",
-      "keyColor": "red"
-    },
-    {
-      "type": "terminal",
-      "key": "╰─  Term",
-      "keyColor": "red"
-    },
-    "break",
-    {
-      "type": "cpu",
-      "key": "╭─  CPU",
-      "keyColor": "cyan"
-    },
-    {
-      "type": "gpu",
-      "key": "├─ 󰢮 GPU",
-      "keyColor": "cyan"
-    },
-    {
-      "type": "memory",
-      "key": "├─  RAM",
-      "keyColor": "cyan"
-    },
-    {
-      "type": "disk",
-      "key": "╰─  Disk",
-      "keyColor": "cyan"
-    },
-    "break",
-    "colors"
-  ]
+    "modules": [
+        "title",
+        "separator",
+        {
+            "type": "os",
+            "key": "╭─  OS",
+            "keyColor": "red"
+        },
+        {
+            "type": "command",
+            "key": "├─  Kernel",
+            "keyColor": "red",
+            "text": "uname -sr | sed 's/-cachyos//g'"
+        },
+        {
+            "type": "packages",
+            "key": "├─ 󰏖 Pkgs",
+            "keyColor": "red"
+        },
+        {
+            "type": "shell",
+            "key": "├─  Shell",
+            "keyColor": "red"
+        },
+        {
+            "type": "wm",
+            "key": "├─  WM",
+            "keyColor": "red"
+        },
+        {
+            "type": "terminal",
+            "key": "╰─  Term",
+            "keyColor": "red"
+        },
+        "break",
+        {
+            "type": "cpu",
+            "key": "╭─  CPU",
+            "keyColor": "red"
+        },
+        {
+            "type": "gpu",
+            "key": "├─ 󰢮 GPU",
+            "keyColor": "red"
+        },
+        {
+            "type": "memory",
+            "key": "├─ 󰑭 RAM",
+            "keyColor": "red"
+        },
+        {
+            "type": "disk",
+            "key": "╰─ 󰋊 Disk",
+            "folders": "/",
+            "keyColor": "red"
+        },
+        "break",
+        "colors"
+    ]
 }
+
