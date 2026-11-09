@@ -1,64 +1,24 @@
-# X64 LIOS PRO Terminal - Starship Configuration
-"$schema" = 'https://starship.rs/config-schema.json'
-
-add_newline = true
-command_timeout = 1000
-
 format = """
-[┌─](bold cyan) [$os](bold cyan)[$username](bold cyan)[@](bold cyan)[$hostname](bold cyan) [](cyan) [$directory](bold blue) [$git_branch$git_status](bold purple)
-[└─](bold cyan)$character """
-
-[os]
-disabled = false
-format = "[$symbol]($style)"
-
-[os.symbols]
-Arch = "󰣇 "
-CachyOS = "󰣇 "
-Linux = "󰌽 "
-Unknown = "󰌽 "
+[](#ff2b2b)\
+$username\
+[](#ff2b2b) \
+[](#262626)\
+$directory\
+[](#262626) \
+$character"""
 
 [username]
-style_user = "bold cyan"
-style_root = "bold red"
-format = "[$user]($style)"
-show_always = false
-
-[hostname]
-ssh_only = false
-format = "[$hostname]($style)"
-disabled = false
+show_always = true
+style_user = "bg:#ff2b2b fg:#ffffff"
+style_root = "bg:#ff2b2b fg:#ffffff"
+format = "[X64 LIOS]($style)"
 
 [directory]
-style = "bold blue"
-truncation_length = 4
+style = "bg:#262626 fg:#ffffff"
+format = "[ $path]($style)"
+truncation_length = 3
 truncation_symbol = "…/"
-read_only = " 󰌾"
-
-[git_branch]
-symbol = " "
-style = "bold purple"
-format = "[$symbol$branch]($style) "
-
-[git_status]
-format = '([$all_status$ahead_behind]($style) )'
-style = "bold red"
-conflicted = "🏳 "
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-untracked = "🤷 "
-stashed = "📦 "
-modified = "📝 "
-staged = "[++\\($count\\)](green) "
-renamed = "👅 "
-deleted = "🗑 "
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[✗](bold red)"
-vimcmd_symbol = "[❮](bold yellow)"
-
-[cmd_duration]
-min_time = 500
-format = " [󱎫 $duration](bold yellow)"
+success_symbol = "[❯](#ff2b2b)"
+error_symbol = "[✗](#ff2b2b)"

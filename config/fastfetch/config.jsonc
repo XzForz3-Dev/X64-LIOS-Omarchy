@@ -3,13 +3,13 @@
   "logo": {
     "source": "/usr/share/omarchy/logo.txt",
     "type": "file",
-    "color": {"1": "cyan"}
+    "color": {"1": "red"}
   },
   "display": {
     "separator": " 󰁔 ",
     "color": {
-      "keys": "cyan",
-      "title": "cyan"
+      "keys": "red",
+      "title": "red"
     }
   },
   "modules": [
@@ -18,53 +18,53 @@
     {
       "type": "os",
       "key": "╭─  OS",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     {
       "type": "kernel",
       "key": "├─  Kernel",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     {
       "type": "packages",
       "key": "├─ 󰏖 Pkgs",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     {
       "type": "shell",
       "key": "├─  Shell",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     {
       "type": "wm",
       "key": "├─  WM",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     {
       "type": "terminal",
       "key": "╰─  Term",
-      "keyColor": "cyan"
+      "keyColor": "red"
     },
     "break",
     {
       "type": "cpu",
       "key": "╭─  CPU",
-      "keyColor": "green"
+      "keyColor": "cyan"
     },
     {
       "type": "gpu",
       "key": "├─ 󰢮 GPU",
-      "keyColor": "green"
+      "keyColor": "cyan"
     },
     {
       "type": "memory",
       "key": "├─  RAM",
-      "keyColor": "green"
+      "keyColor": "cyan"
     },
     {
       "type": "disk",
       "key": "╰─  Disk",
-      "keyColor": "green"
+      "keyColor": "cyan"
     },
     "break",
     "colors"
