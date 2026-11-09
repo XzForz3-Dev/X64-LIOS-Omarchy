@@ -42,7 +42,7 @@ CORE_UI_PKGS = [
     'gpu-screen-recorder', 'cliphist', 'adw-gtk-theme', 'xdg-terminal-exec',
     'xdg-desktop-portal-hyprland', 'socat', 'udiskie', 'wtype', 'wl-clipboard',
     'pamixer', 'brightnessctl', 'inotify-tools', 'bluez-tools', 'fcitx5',
-    'yaru-icon-theme'
+    'yaru-icon-theme', 'omarchy-speedtest'
 ]
 
 def log(msg, color="36"):
