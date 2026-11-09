@@ -161,6 +161,7 @@ def setup_environment_and_wrappers():
     os.makedirs("/usr/local/bin", exist_ok=True)
     bin_dir = os.path.join(OMARCHY_DIR, "bin")
     if os.path.isdir(bin_dir):
+        run(["chmod", "-R", "+x", bin_dir], check=False)
         for entry in os.listdir(bin_dir):
             full_path = os.path.join(bin_dir, entry)
             if not os.path.isfile(full_path) or not os.access(full_path, os.X_OK):
