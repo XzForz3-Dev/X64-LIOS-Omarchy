@@ -55,6 +55,19 @@ if [[ -f $language_file ]]; then
   if [[ $candidate =~ ^[a-z]{2,3}(-[A-Za-z]{2})?$ && -f $i18n/$candidate/cli.json ]]; then
     language=$candidate
   fi
+elif [[ -n ${LANG:-} ]]; then
+  sys_raw=${LANG%%.*}
+  sys_candidate=${sys_raw//_/-}
+  if [[ -f $i18n/$sys_candidate/cli.json ]]; then
+    language=$sys_candidate
+  else
+    sys_base=${sys_candidate%%-*}
+    if [[ $sys_base == "es" && -f $i18n/es-MX/cli.json ]]; then
+      language=es-MX
+    elif [[ -f $i18n/$sys_base/cli.json ]]; then
+      language=$sys_base
+    fi
+  fi
 fi
 
 language_catalog=$i18n/$language/cli.json

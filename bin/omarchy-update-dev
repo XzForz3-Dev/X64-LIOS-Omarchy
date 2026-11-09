@@ -43,7 +43,7 @@ if [[ -z $upstream ]]; then
   exit 0
 fi
 
-echo -e "\e[32m\nActualizando entorno X64 LIOS + Omarchy desde Git...\e[0m"
+echo -e "\e[32m\n$(omarchy-i18n update.stepGit)\e[0m"
 
 # Fetch latest changes
 _git fetch --quiet || true
