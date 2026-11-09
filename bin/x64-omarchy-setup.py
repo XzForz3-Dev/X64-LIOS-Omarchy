@@ -189,14 +189,35 @@ def setup_system_assets():
         shutil.copy2(font_src, os.path.join(font_dir, "omarchy.ttf"))
         run(["fc-cache", "-f", font_dir], check=False)
 
-    # Servicios systemd de usuario
+    # Servicios systemd de usuario y drop-ins
     srv_dir = os.path.join(OMARCHY_DIR, "default/systemd/user")
     if os.path.isdir(srv_dir):
         dest_srv = "/usr/lib/systemd/user"
         os.makedirs(dest_srv, exist_ok=True)
         for s in os.listdir(srv_dir):
+            src_path = os.path.join(srv_dir, s)
             if s.endswith(".service"):
-                shutil.copy2(os.path.join(srv_dir, s), os.path.join(dest_srv, s))
+                shutil.copy2(src_path, os.path.join(dest_srv, s))
+            elif os.path.isdir(src_path) and s.endswith(".d"):
+                dst_d = os.path.join(dest_srv, s)
+                os.makedirs(dst_d, exist_ok=True)
+                shutil.copytree(src_path, dst_d, dirs_exist_ok=True)
+
+    # Configuración de compatibilidad global para el motor de fondos animados (OWE)
+    etc_owe_dropin = "/etc/systemd/user/owed.service.d"
+    os.makedirs(etc_owe_dropin, exist_ok=True)
+    with open(os.path.join(etc_owe_dropin, "10-x64-compatibility.conf"), "w") as f:
+        f.write("[Service]\nEnvironment=\"OWE_DRM_DPMS=0\"\n")
+
+    # Habilitación automática de OWE en la sesión gráfica para todos los usuarios
+    graphical_wants = "/etc/systemd/user/graphical-session.target.wants"
+    os.makedirs(graphical_wants, exist_ok=True)
+    owed_unit = "/usr/lib/systemd/user/owed.service"
+    if os.path.exists(owed_unit):
+        link_target = os.path.join(graphical_wants, "owed.service")
+        if os.path.lexists(link_target):
+            os.remove(link_target)
+        os.symlink(owed_unit, link_target)
 
     # Sesiones Wayland
     sess_dir = os.path.join(OMARCHY_DIR, "default/wayland-sessions")
