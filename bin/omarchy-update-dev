@@ -43,13 +43,13 @@ if [[ -z $upstream ]]; then
   exit 0
 fi
 
-echo -e "\e[32m\n$(omarchy-i18n update.stepGit)\e[0m"
+echo -e "\n\033[1;31m►\033[0m \033[1;37m$(omarchy-i18n update.stepGit)\033[0m"
 
 # Fetch latest changes
 _git fetch --quiet || true
 
 # Pull fast-forward or autostash if user had local adjustments
-if ! _git merge --ff-only "@{upstream}" 2>/dev/null; then
-  echo -e "\e[33mDetectados ajustes locales. Aplicando autostash seguro...\e[0m"
-  _git pull --rebase --autostash || true
+if ! _git merge --ff-only "@{upstream}" 2>&1 | sed 's/^/   /'; then
+  echo -e "   \033[1;33mDetectados ajustes locales. Aplicando autostash seguro...\033[0m"
+  _git pull --rebase --autostash 2>&1 | sed 's/^/   /' || true
 fi

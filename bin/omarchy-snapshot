@@ -34,14 +34,14 @@ create)
     exit 1
   fi
 
-  echo -e "\e[32m$(omarchy-i18n update.stepSnapshot)\e[0m"
+  echo -e "\n\033[1;31m►\033[0m \033[1;37m$(omarchy-i18n update.stepSnapshot)\033[0m"
 
   for config in "${CONFIGS[@]}"; do
     sudo snapper -c "$config" create -c number -d "$DESC"
     sudo snapper -c "$config" cleanup number
   done
 
-  echo "$(omarchy-i18n update.snapshotDone)"
+  echo -e "   \033[0;37m$(omarchy-i18n update.snapshotDone)\033[0m"
   ;;
 restore)
   sudo limine-snapper-restore

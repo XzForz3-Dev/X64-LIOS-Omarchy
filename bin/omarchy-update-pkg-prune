@@ -8,6 +8,6 @@ set -e
 # The cache is the only offline downgrade path, so keep two. Run before the
 # packages update and the installed version survives with a spare. paccache
 # retains by version order, never by what is installed.
-echo -e "\e[32m\n$(omarchy-i18n update.stepPrune)\e[0m"
-sudo paccache -rk2 2>&1 | grep -v 'no candidate packages found for pruning' || true
-echo "$(omarchy-i18n update.pruneDone)"
+echo -e "\n\033[1;31m►\033[0m \033[1;37m$(omarchy-i18n update.stepPrune)\033[0m"
+sudo paccache -rk2 2>&1 | grep -v 'no candidate packages found for pruning' | sed 's/^/   /' || true
+echo -e "   \033[0;37m$(omarchy-i18n update.pruneDone)\033[0m"
