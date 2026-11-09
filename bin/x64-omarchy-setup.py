@@ -214,6 +214,12 @@ def setup_system_assets():
         for f in os.listdir(xdg_term_dir):
             shutil.copy2(os.path.join(xdg_term_dir, f), os.path.join(dest_term, f))
 
+    # Configuración de PAM para la pantalla de bloqueo animada
+    apply_lock_bin = os.path.join(OMARCHY_DIR, "bin/omarchy-apply-lock")
+    if os.path.exists(apply_lock_bin):
+        log("Configurando PAM para la pantalla de bloqueo oficial (omarchy-apply-lock)...")
+        run(["bash", apply_lock_bin], check=False)
+
 def silence_migrations(users):
     log("Marcando historial de migraciones de Omarchy como completado...")
     mig_dir = os.path.join(OMARCHY_DIR, "migrations")

@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# omarchy:summary=Launch the Omarchy screensaver on every display.
+# omarchy:summary=Launch the Omarchy screensaver or lock screen on every display.
 # omarchy:args=[force] [options]
 
-exec /usr/lib/omarchy-screensaver/omarchy-screensaver "$@"
+if [[ -x /usr/lib/omarchy-screensaver/omarchy-screensaver ]]; then
+  exec /usr/lib/omarchy-screensaver/omarchy-screensaver "$@"
+else
+  exec omarchy-system-lock
+fi
