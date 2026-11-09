@@ -159,14 +159,14 @@ countdown        = "{{ accent }}"
 background                = "{{ background }}"
 background-alpha          = 0.95
 text                      = "{{ foreground }}"
-border                    = "hyprland.active-border-foreground"
+border                    = "hyprland.active-border"
 border-alpha              = 1.0
 scrim                     = "{{ background }}"
 scrim-alpha               = 0.5
 selected-background       = "{{ foreground }}"
 selected-background-alpha = 0.08
 selected-text             = "{{ accent }}"
-selected-border           = "hyprland.active-border-foreground"
+selected-border           = "hyprland.active-border"
 selected-border-alpha     = 0.25
 
 [menu]
@@ -176,14 +176,14 @@ selected-border-alpha     = 0.25
 background                = "{{ background }}"
 background-alpha          = 1.0
 text                      = "{{ foreground }}"
-border                    = "hyprland.active-border-foreground"
+border                    = "hyprland.active-border"
 border-alpha              = 1.0
 scrim                     = "{{ background }}"
 scrim-alpha               = 0.5
 selected-background       = "{{ foreground }}"
 selected-background-alpha = 0.08
 selected-text             = "{{ accent }}"
-selected-border           = "hyprland.active-border-foreground"
+selected-border           = "hyprland.active-border"
 selected-border-alpha     = 0.25
 
 [polkit]
