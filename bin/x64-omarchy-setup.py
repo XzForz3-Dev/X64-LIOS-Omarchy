@@ -220,6 +220,14 @@ def setup_system_assets():
         log("Configurando PAM para la pantalla de bloqueo oficial (omarchy-apply-lock)...")
         run(["bash", apply_lock_bin], check=False)
 
+    # Configuración del sistema para Mise (herramientas predeterminadas y agentes IA)
+    mise_src = os.path.join(OMARCHY_DIR, "etc/mise")
+    if os.path.isdir(mise_src):
+        log("Desplegando configuraciones del sistema para Mise (/etc/mise)...")
+        dest_mise = "/etc/mise"
+        os.makedirs(dest_mise, exist_ok=True)
+        shutil.copytree(mise_src, dest_mise, dirs_exist_ok=True)
+
 def silence_migrations(users):
     log("Marcando historial de migraciones de Omarchy como completado...")
     mig_dir = os.path.join(OMARCHY_DIR, "migrations")
