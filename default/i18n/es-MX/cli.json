@@ -381,6 +381,7 @@
   "update.kernelReboot": "El kernel de Linux se actualizó. ¿Reiniciar?",
   "update.keysCorrect": "Claves verificadas correctamente [✓]",
   "update.noShutdown": "No apagues ni reinicies el equipo durante el proceso de instalación.",
+  "update.pruneDone": "Caché de paquetes optimizada y limpia.",
   "update.ready": "¿Listo para actualizar X64 LIOS?",
   "update.rebootRequired": "Las actualizaciones requieren reiniciar. ¿Listo?",
   "update.removeOrphans": {
@@ -388,7 +389,9 @@
     "one": "¿Eliminar %1 paquete huérfano?",
     "other": "¿Eliminar %1 paquetes huérfanos?"
   },
+  "update.shellPluginsReloaded": "Todos los plugins y componentes han sido recargados",
   "update.snapshotBtrfs": "Creación automática de instantánea Snapper Btrfs para recuperación.",
+  "update.snapshotDone": "Punto de restauración disponible en el menú de arranque.",
   "update.stepGit": "Actualizando entorno X64 LIOS + Omarchy desde Git…",
   "update.stepKeys": "Actualizando claves criptográficas del sistema",
   "update.stepMise": "Actualizando herramientas y entornos mise",

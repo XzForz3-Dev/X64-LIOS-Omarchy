@@ -41,7 +41,7 @@ create)
     sudo snapper -c "$config" cleanup number
   done
 
-  echo "Snapshots can be selected during boot."
+  echo "$(omarchy-i18n update.snapshotDone)"
   ;;
 restore)
   sudo limine-snapper-restore
