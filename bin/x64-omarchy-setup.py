@@ -255,7 +255,7 @@ def silence_migrations(users):
         except Exception:
             pass
 
-def setup_user_configs(users, default_theme="Tokyo Night"):
+def setup_user_configs(users, default_theme="x64-lios-crimson"):
     log("Configurando carpetas de usuario, accesos de personalización y tema...")
     
     cfg_src = os.path.join(OMARCHY_DIR, "config")
@@ -334,7 +334,7 @@ def configure_sddm_session(users):
 def main():
     parser = argparse.ArgumentParser(description="Instalador Oficial de X64 LIOS + Omarchy")
     parser.add_argument("--user", help="Usuario específico a configurar")
-    parser.add_argument("--theme", default="Tokyo Night", help="Tema predeterminado")
+    parser.add_argument("--theme", default="x64-lios-crimson", help="Tema predeterminado")
     parser.add_argument("--skip-packages", action="store_true", help="Omitir instalación de paquetes pacman")
     args = parser.parse_args()
 
