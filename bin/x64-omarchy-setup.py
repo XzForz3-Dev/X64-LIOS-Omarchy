@@ -250,14 +250,30 @@ def setup_system_assets():
         os.makedirs(dest_mise, exist_ok=True)
         shutil.copytree(mise_src, dest_mise, dirs_exist_ok=True)
 
-    # Ganchos de ALPM / Pacman de Omarchy (incluye revocación de sudo sin contraseña y pausa de Hyprland)
+    # Ganchos de ALPM / Pacman:
+    # IMPORTANTE: Desplegamos únicamente los ganchos compatibles. Excluimos y purgamos
+    # 00-omarchy-update-guard.hook, 10-... y 90-... porque contienen "Depends = omarchy"
+    # que bloquea transacciones de Pacman y del actualizador oficial x64-update.
+    dest_hooks = "/usr/share/libalpm/hooks"
+    os.makedirs(dest_hooks, exist_ok=True)
+    for blocked_hook in [
+        "00-omarchy-update-guard.hook",
+        "10-omarchy-hyprland-reload-pause.hook",
+        "90-omarchy-hyprland-reload-resume.hook",
+    ]:
+        p = os.path.join(dest_hooks, blocked_hook)
+        if os.path.exists(p):
+            try:
+                os.remove(p)
+            except Exception:
+                pass
+
     alpm_hooks_dir = os.path.join(OMARCHY_DIR, "default/libalpm/hooks")
+    allowed_hooks = {"05-omarchy-passwordless-revoke.hook"}
     if os.path.isdir(alpm_hooks_dir):
-        log("Desplegando ganchos ALPM (/usr/share/libalpm/hooks)...")
-        dest_hooks = "/usr/share/libalpm/hooks"
-        os.makedirs(dest_hooks, exist_ok=True)
+        log("Desplegando ganchos ALPM compatibles (/usr/share/libalpm/hooks)...")
         for h in os.listdir(alpm_hooks_dir):
-            if h.endswith(".hook"):
+            if h in allowed_hooks:
                 src_h = os.path.join(alpm_hooks_dir, h)
                 dst_h = os.path.join(dest_hooks, h)
                 shutil.copy2(src_h, dst_h)
