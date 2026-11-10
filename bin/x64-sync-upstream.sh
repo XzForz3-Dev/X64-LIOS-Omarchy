@@ -29,7 +29,7 @@ fi
 echo -e "\n\033[1;33m[+] Obteniendo commits de Basecamp ($UPSTREAM_REMOTE/$UPSTREAM_BRANCH)...\033[0m"
 git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
 
-LOCAL_UPSTREAM_COMMIT=$(git rev-parse upstream 2>/dev/null || echo "")
+LOCAL_UPSTREAM_COMMIT=$(git rev-parse refs/heads/upstream 2>/dev/null || git rev-parse upstream 2>/dev/null || echo "")
 REMOTE_UPSTREAM_COMMIT=$(git rev-parse "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")
 
 if [ "$LOCAL_UPSTREAM_COMMIT" = "$REMOTE_UPSTREAM_COMMIT" ]; then
@@ -51,15 +51,25 @@ if echo "$CHANGED_PACKAGES" | grep -E "^\+.*($BLACKLIST_PATTERN)" >/dev/null 2>&
     echo -e "\033[1;33m[i] El filtro neutralizará estas dependencias para proteger el kernel BORE.\033[0m"
 fi
 
-# 4. Chequeo sintáctico previo (Sanity Check en scripts bash)
+# 4. Chequeo sintáctico previo (Sanity Check en scripts Bash y Python)
 echo -e "\n\033[1;33m[+] Analizando sintaxis de scripts modificados...\033[0m"
 MODIFIED_SCRIPTS=$(git diff --name-only "$LOCAL_UPSTREAM_COMMIT" "$REMOTE_UPSTREAM_COMMIT" | grep -E "^bin/|^install/.*\.sh$" || true)
 
 SYNTAX_ERRORS=0
 for script in $MODIFIED_SCRIPTS; do
-    if [ -f "$script" ]; then
-        if ! bash -n "$script" 2>/dev/null; then
-            echo -e "\033[1;31m[X] Error sintáctico en $script\033[0m"
+    CONTENT=$(git show "$REMOTE_UPSTREAM_COMMIT:$script" 2>/dev/null || true)
+    if [ -z "$CONTENT" ]; then
+        continue
+    fi
+    SHEBANG=$(head -n 1 <<< "$CONTENT")
+    if [[ "$script" == *.py ]] || echo "$SHEBANG" | grep -q "python"; then
+        if ! python3 -c "import ast, sys; ast.parse(sys.stdin.read())" <<< "$CONTENT" 2>/dev/null; then
+            echo -e "\033[1;31m[X] Error sintáctico en Python: $script\033[0m"
+            SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+        fi
+    elif [[ "$script" == *.sh ]] || echo "$SHEBANG" | grep -q -E "bash|sh"; then
+        if ! bash -n <<< "$CONTENT" 2>/dev/null; then
+            echo -e "\033[1;31m[X] Error sintáctico en Bash: $script\033[0m"
             SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
         fi
     fi
