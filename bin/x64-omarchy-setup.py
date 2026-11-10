@@ -276,6 +276,90 @@ def setup_system_assets():
                 shutil.copy2(src_t, dst_t)
                 os.chmod(dst_t, 0o644)
 
+    # Reglas oficiales de sudoers de Omarchy (DNS, locales, navegador, timezone y límites de reintentos)
+    sudoers_src = os.path.join(OMARCHY_DIR, "etc/sudoers.d")
+    if os.path.isdir(sudoers_src):
+        log("Desplegando políticas de sudoers (/etc/sudoers.d)...")
+        dest_sudoers = "/etc/sudoers.d"
+        os.makedirs(dest_sudoers, exist_ok=True)
+        for s in os.listdir(sudoers_src):
+            src_s = os.path.join(sudoers_src, s)
+            dst_s = os.path.join(dest_sudoers, s)
+            if os.path.isfile(src_s):
+                shutil.copy2(src_s, dst_s)
+                os.chmod(dst_s, 0o440)
+
+    # Configuración de tolerancia PAM Faillock (deny = 10 para evitar bloqueos prematuros)
+    faillock_src = os.path.join(OMARCHY_DIR, "etc/security/faillock.conf")
+    if os.path.exists(faillock_src):
+        log("Desplegando configuración de tolerancia PAM Faillock (/etc/security/faillock.conf)...")
+        os.makedirs("/etc/security", exist_ok=True)
+        shutil.copy2(faillock_src, "/etc/security/faillock.conf")
+        os.chmod("/etc/security/faillock.conf", 0o644)
+
+    # Optimizaciones del Kernel Sysctl (inotify file watchers, BBR y max_map_count)
+    sysctl_src = os.path.join(OMARCHY_DIR, "etc/sysctl.d")
+    if os.path.isdir(sysctl_src):
+        log("Desplegando parámetros sysctl del sistema (/etc/sysctl.d)...")
+        dest_sysctl = "/etc/sysctl.d"
+        os.makedirs(dest_sysctl, exist_ok=True)
+        for conf in os.listdir(sysctl_src):
+            if conf.endswith(".conf"):
+                src_c = os.path.join(sysctl_src, conf)
+                dst_c = os.path.join(dest_sysctl, conf)
+                shutil.copy2(src_c, dst_c)
+                os.chmod(dst_c, 0o644)
+        run(["sysctl", "--system"], check=False)
+
+    # Reglas Udev (Planificadores de E/S para SSD/NVMe y compatibilidad de hardware)
+    udev_src = os.path.join(OMARCHY_DIR, "etc/udev/rules.d")
+    if os.path.isdir(udev_src):
+        log("Desplegando reglas udev (/etc/udev/rules.d)...")
+        dest_udev = "/etc/udev/rules.d"
+        os.makedirs(dest_udev, exist_ok=True)
+        for r in os.listdir(udev_src):
+            if r.endswith(".rules"):
+                src_r = os.path.join(udev_src, r)
+                dst_r = os.path.join(dest_udev, r)
+                shutil.copy2(src_r, dst_r)
+                os.chmod(dst_r, 0o644)
+        run(["udevadm", "control", "--reload"], check=False)
+
+    # Drop-ins del sistema para Systemd (apagado rápido 10s, límites nofile, etc.)
+    systemd_etc = os.path.join(OMARCHY_DIR, "etc/systemd")
+    if os.path.isdir(systemd_etc):
+        log("Desplegando drop-ins de optimización para systemd (/etc/systemd)...")
+        for root, dirs, files in os.walk(systemd_etc):
+            rel_path = os.path.relpath(root, systemd_etc)
+            target_dir = os.path.join("/etc/systemd", rel_path) if rel_path != "." else "/etc/systemd"
+            os.makedirs(target_dir, exist_ok=True)
+            for f in files:
+                if f.endswith(".conf"):
+                    src_f = os.path.join(root, f)
+                    dst_f = os.path.join(target_dir, f)
+                    shutil.copy2(src_f, dst_f)
+                    os.chmod(dst_f, 0o644)
+
+    # Scripts de suspensión y reposo del sistema (desmontaje seguro FUSE y hardware)
+    sleep_src = os.path.join(OMARCHY_DIR, "default/systemd/system-sleep")
+    if os.path.isdir(sleep_src):
+        log("Desplegando scripts para suspensión del sistema (/usr/lib/systemd/system-sleep)...")
+        dest_sleep = "/usr/lib/systemd/system-sleep"
+        os.makedirs(dest_sleep, exist_ok=True)
+        for s in os.listdir(sleep_src):
+            src_s = os.path.join(sleep_src, s)
+            dst_s = os.path.join(dest_sleep, s)
+            if os.path.isfile(src_s):
+                shutil.copy2(src_s, dst_s)
+                os.chmod(dst_s, 0o755)
+
+    # Configuración de modprobe USB autosuspend
+    modprobe_src = os.path.join(OMARCHY_DIR, "etc/modprobe.d/omarchy-usb-autosuspend.conf")
+    if os.path.exists(modprobe_src):
+        os.makedirs("/etc/modprobe.d", exist_ok=True)
+        shutil.copy2(modprobe_src, "/etc/modprobe.d/omarchy-usb-autosuspend.conf")
+        os.chmod("/etc/modprobe.d/omarchy-usb-autosuspend.conf", 0o644)
+
 def silence_migrations(users):
     log("Marcando historial de migraciones de Omarchy como completado...")
     mig_dir = os.path.join(OMARCHY_DIR, "migrations")
