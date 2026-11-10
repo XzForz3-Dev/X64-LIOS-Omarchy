@@ -250,6 +250,32 @@ def setup_system_assets():
         os.makedirs(dest_mise, exist_ok=True)
         shutil.copytree(mise_src, dest_mise, dirs_exist_ok=True)
 
+    # Ganchos de ALPM / Pacman de Omarchy (incluye revocación de sudo sin contraseña y pausa de Hyprland)
+    alpm_hooks_dir = os.path.join(OMARCHY_DIR, "default/libalpm/hooks")
+    if os.path.isdir(alpm_hooks_dir):
+        log("Desplegando ganchos ALPM (/usr/share/libalpm/hooks)...")
+        dest_hooks = "/usr/share/libalpm/hooks"
+        os.makedirs(dest_hooks, exist_ok=True)
+        for h in os.listdir(alpm_hooks_dir):
+            if h.endswith(".hook"):
+                src_h = os.path.join(alpm_hooks_dir, h)
+                dst_h = os.path.join(dest_hooks, h)
+                shutil.copy2(src_h, dst_h)
+                os.chmod(dst_h, 0o644)
+
+    # Configuraciones tmpfiles de Omarchy (limpiador de arranque para sudo temporal y optimizaciones)
+    tmpfiles_dir = os.path.join(OMARCHY_DIR, "etc/tmpfiles.d")
+    if os.path.isdir(tmpfiles_dir):
+        log("Desplegando configuraciones tmpfiles (/etc/tmpfiles.d)...")
+        dest_tmp = "/etc/tmpfiles.d"
+        os.makedirs(dest_tmp, exist_ok=True)
+        for t in os.listdir(tmpfiles_dir):
+            if t.endswith(".conf"):
+                src_t = os.path.join(tmpfiles_dir, t)
+                dst_t = os.path.join(dest_tmp, t)
+                shutil.copy2(src_t, dst_t)
+                os.chmod(dst_t, 0o644)
+
 def silence_migrations(users):
     log("Marcando historial de migraciones de Omarchy como completado...")
     mig_dir = os.path.join(OMARCHY_DIR, "migrations")
