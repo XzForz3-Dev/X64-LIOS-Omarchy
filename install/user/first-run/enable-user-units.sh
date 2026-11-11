@@ -29,5 +29,5 @@ for unit in \
   systemctl --user enable --now "$unit" 2>/dev/null || true
 done
 
-[ -f /usr/share/owe/10-owe-sync ] && omarchy-hook-install theme-set /usr/share/owe/10-owe-sync || true
+omarchy-hook-install theme-set /usr/share/owe/10-owe-sync 2>/dev/null || true
 exit 0

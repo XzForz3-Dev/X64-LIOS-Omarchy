@@ -90,7 +90,7 @@ git merge --ff-only "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
 echo -e "\n\033[1;33m[+] Fusionando en rama de producción 'main'...\033[0m"
 git checkout "$TARGET_BRANCH"
 
-if git merge upstream -m "chore(sync): automated merge from upstream Basecamp Omarchy"; then
+if git merge refs/heads/upstream -m "chore(sync): automated merge from upstream Basecamp Omarchy"; then
     echo -e "\033[1;32m[✓] Fusión completada con éxito. Verificando integridad de la Capa X64...\033[0m"
     
     # Asegurar permisos de scripts
