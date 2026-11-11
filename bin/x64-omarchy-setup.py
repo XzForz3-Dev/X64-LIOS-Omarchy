@@ -189,6 +189,17 @@ exec /usr/share/omarchy/bin/{entry} "$@"
                 fw.write(wrapper_code)
             os.chmod(target_wrapper, 0o755)
 
+            # Compatibilidad absoluta con sudoers, hooks ALPM, scripts privilegiados y systemd que esperan /usr/bin/omarchy-*
+            if entry == "omarchy" or entry.startswith("omarchy-"):
+                target_usr_bin = os.path.join("/usr/bin", entry)
+                try:
+                    if os.path.islink(target_usr_bin) or os.path.exists(target_usr_bin):
+                        os.unlink(target_usr_bin)
+                    os.symlink(full_path, target_usr_bin)
+                except Exception as e:
+                    log(f"Advertencia creando symlink en /usr/bin/{entry}: {e}", "33")
+
+
 def setup_system_assets():
     log("Desplegando fuentes, servicios systemd y entradas de sesión...")
     
