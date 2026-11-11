@@ -16,7 +16,10 @@ from pathlib import Path
 
 OMARCHY_DIR = "/usr/share/omarchy"
 OMARCHY_REPO = "https://github.com/XzForz3-Dev/X64-LIOS-Omarchy.git"
-UPSTREAM_PKGS_REPO = "https://pkgs.omarchy.org/$arch/"
+UPSTREAM_PKGS_REPOS = [
+    "https://pkgs.omarchy.org/edge/$arch",
+    "https://pkgs.omarchy.org/stable/$arch"
+]
 
 # Lista de paquetes bloqueados para proteger el núcleo BORE y CachyOS de X64 LIOS
 BLACKLISTED_PKGS = {
@@ -68,17 +71,13 @@ def get_target_users(user_arg=None):
     return users or [os.environ.get("USER", "root")]
 
 def configure_pacman_repo():
-    log("Configurando repositorio oficial Basecamp [omarchy] en pacman.conf...")
+    log("Configurando repositorio oficial Basecamp [omarchy] (edge + stable) en pacman.conf...")
     conf_path = "/etc/pacman.conf"
     if not os.path.exists(conf_path):
         return
     
     with open(conf_path, "r", encoding="utf-8") as f:
         conf = f.read()
-
-    # Reparar URLs mal formadas
-    if "https://pkgs.omarchy.org//" in conf:
-        conf = conf.replace("https://pkgs.omarchy.org//", "https://pkgs.omarchy.org/$arch/")
 
     # Bloquear linux-omarchy en IgnorePkg
     if "IgnorePkg" in conf:
@@ -91,20 +90,24 @@ def configure_pacman_repo():
     else:
         conf = conf.replace("[options]", "[options]\nIgnorePkg = linux-omarchy linux-omarchy-headers")
 
-    # Inyectar repositorio [omarchy] antes de repositorios secundarios
-    if "[omarchy]" not in conf:
+    repo_servers = "\n".join([f"Server = {s}" for s in UPSTREAM_PKGS_REPOS])
+    repo_block = f"[omarchy]\nSigLevel = Optional TrustAll\n{repo_servers}\n\n"
+
+    # Si ya existe [omarchy], actualizar los servidores para incluir edge + stable
+    if "[omarchy]" in conf:
+        conf = re.sub(r'\[omarchy\]\s*\n(?:(?!\[).*\n)*', repo_block, conf)
+    else:
         match = re.search(r'^\[(?!options\]).*?\]', conf, re.MULTILINE)
         if match:
             idx = match.start()
-            repo_block = f"[omarchy]\nSigLevel = Optional TrustAll\nServer = {UPSTREAM_PKGS_REPO}\n\n"
             conf = conf[:idx] + repo_block + conf[idx:]
         else:
-            conf += f"\n[omarchy]\nSigLevel = Optional TrustAll\nServer = {UPSTREAM_PKGS_REPO}\n"
+            conf += f"\n{repo_block}"
 
     with open(conf_path, "w", encoding="utf-8") as f:
         f.write(conf)
 
-    log("Sincronizando bases de datos de Pacman...")
+    log("Sincronizando bases de datos de Pacman con canales edge y stable...")
     run(["pacman", "-Sy", "--noconfirm"])
 
 def install_packages():
@@ -130,7 +133,15 @@ def install_packages():
         cmd = ["pacman", "-S", "--needed", "--noconfirm", "--overwrite", "*", "--assume-installed", "linux-omarchy=99.9"] + missing
         res = subprocess.run(cmd)
         if res.returncode != 0:
-            log("Advertencia: Pacman reportó un código de salida no cero, reintentando paquetes críticos...", "33")
+            log("Advertencia: Pacman reportó un código de salida no cero, filtrando paquetes disponibles...", "33")
+            available_missing = []
+            for p in missing:
+                if subprocess.run(["pacman", "-Si", p], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                    available_missing.append(p)
+                else:
+                    log(f"Paquete omitido por no estar aún en repositorios: {p}", "33")
+            if available_missing:
+                run(["pacman", "-S", "--needed", "--noconfirm", "--overwrite", "*", "--assume-installed", "linux-omarchy=99.9"] + available_missing, check=False)
             run(["pacman", "-S", "--needed", "--noconfirm", "--overwrite", "*"] + CORE_UI_PKGS, check=False)
     else:
         log("Todos los paquetes oficiales ya están instalados en el sistema.", "32")
