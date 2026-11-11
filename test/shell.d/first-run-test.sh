@@ -146,9 +146,8 @@ offers_git_setup() {
   grep -Fq 'omarchy-setup-git' "$test_tmp/calls"
 }
 
-offers_git_setup "" "" || fail "first run offers git setup on a fresh account"
-offers_git_setup "Jane" "" || fail "first run offers git setup when the email is missing"
-if offers_git_setup "Jane" "jane@example.com"; then
-  fail "first run offers no git setup when the install already set an identity"
+# In X64 LIOS, first run does not send git setup notification to keep first boot clean.
+if offers_git_setup "" ""; then
+  fail "first run in X64 LIOS should not pop up git setup notification"
 fi
-pass "first run offers git setup only when the identity is missing"
+pass "first run in X64 LIOS suppresses automatic git setup notification"

@@ -50,9 +50,9 @@ announce_network() {
   bash "$OMARCHY_PATH/install/user/first-run/setup-agent.hook"
   bash "$OMARCHY_PATH/install/user/first-run/setup-fingerprint.hook"
 
-  # A fresh install from current media has nothing to update, and a toast
-  # that leads nowhere teaches people to dismiss the next one.
-  update_pending && notify_update
+  # In X64 LIOS, immediate post-install update notifications are disabled because
+  # fresh installations are already up-to-date. Updates are managed via x64-dashboard.
+  # update_pending && notify_update
 }
 
 # Detached, so a slow or absent connection never holds up the rest of first run.
