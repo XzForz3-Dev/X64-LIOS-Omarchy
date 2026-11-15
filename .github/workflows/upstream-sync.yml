@@ -43,6 +43,7 @@ jobs:
 
       - name: Notificar si se requiere intervención técnica
         if: failure()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

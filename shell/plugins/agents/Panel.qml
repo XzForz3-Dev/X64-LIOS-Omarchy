@@ -63,13 +63,29 @@ Panel {
   }
 
   // A stopped model with an error to explain, which links to its logs. Only
-  // this machine's own: a tailnet model's logs live on its host.
+  // this machine's own: a tailnet model's logs live on its host. A tailnet
+  // model can fail to pair instead, which links to what pairing printed.
   function localFailed(model) {
-    return !model.host && ["active", "activating", "deactivating", "removing"].indexOf(model.unit) < 0 && String(model.error || "") !== ""
+    if (model.host) return pairFailure(model) !== null
+    return ["active", "activating", "deactivating", "removing"].indexOf(model.unit) < 0 && String(model.error || "") !== ""
+  }
+
+  // A failed pairing still to explain: not once the model is paired, its host
+  // is away (its line says so instead), or it's being paired again.
+  function pairFailure(model) {
+    if (!model || !model.host || model.paired === true || String(model.offline || "") !== "") return null
+    var id = modelId(model)
+    return usage.pairingId === id ? null : (usage.pairFailures[id] || null)
   }
 
   function showLocalLogs(model) {
-    Util.execArgv(["omarchy-launch-floating-terminal-with-presentation", "omarchy-agent-local logs " + Util.shellQuote(String(model.recipe))])
+    var failure = model.panelSetup ? { output: model.output } : pairFailure(model)
+    // A pairing's output is all there is of it, and so is that of a setup
+    // that failed before its download began, so the terminal shows that
+    // again and closes as failed, the way a pairing in a terminal ended.
+    var command = failure ? "printf %s " + Util.shellQuote(String(failure.output)) + "; false"
+      : "omarchy-agent-local logs " + Util.shellQuote(String(model.recipe))
+    Util.execArgv(["omarchy-launch-floating-terminal-with-presentation", command])
     root.close()
   }
 
@@ -87,19 +103,40 @@ Panel {
     } else if (action === "share") {
       Util.execArgv(["omarchy-agent-local", "share", model.recipe].concat(model.shared ? ["--off"] : []))
     } else if (action === "pair") {
-      // A host with another model in use here has given its key already, so
-      // this one connects at once. Otherwise SSH may ask for a password or a
-      // new host key, so pairing gets a terminal.
-      var models = usage.networkModels || {}
-      if (Object.keys(models).some(function(id) { return models[id].host === model.host && models[id].paired })) {
-        Util.execArgv(["omarchy-agent-local", "pair", String(model.host), String(model.recipe)])
-        return
-      }
-      Util.execArgv(["omarchy-launch-floating-terminal-with-presentation", "omarchy-agent-local pair " + Util.shellQuote(String(model.dns || model.host)) + " " + Util.shellQuote(String(model.recipe))])
-      root.close()
+      // Pairs in the background while the panel stays open; a failure shows
+      // on the model's line.
+      usage.pair(model)
+      if (usage.pairingId === modelId(model)) landAfterPair = modelId(model)
     } else if (action === "disconnect") {
       Util.execArgv(["omarchy-agent-local", "forget", modelId(model)])
     }
+  }
+
+  // The model being paired from the panel. Once it is, and running there, the
+  // keyboard cursor lands on its terminal, so Return opens an agent on it.
+  // The survey that shows it paired can trail the pairing itself, and a model
+  // still starting on its host has no terminal yet, so this waits for the
+  // terminal rather than for the pairing to end, while the panel stays open.
+  property string landAfterPair: ""
+  function landOnPaired() {
+    if (landAfterPair === "" || usage.pairingId !== "") return
+    if (!root.opened || usage.pairFailures[landAfterPair]) {
+      landAfterPair = ""
+      return
+    }
+    for (var p = 0; p < providers.length; p++) {
+      var model = providers[p].localModel
+      if (!model || !model.host || modelId(model) !== landAfterPair || model.paired !== true) continue
+      if (localActions(model, usage.canShare).indexOf("launch") < 0) return
+      landAfterPair = ""
+      pointAt("modelLaunch", p)
+      return
+    }
+  }
+  onProvidersChanged: Qt.callLater(landOnPaired)
+  Connections {
+    target: usage
+    function onPairingIdChanged() { Qt.callLater(root.landOnPaired) }
   }
 
   // How long ago an offline host was last seen, in the panel's own words.
@@ -122,7 +159,8 @@ Panel {
   }
 
   // The setup runs on in the background and reports to status.json, where it
-  // becomes the model's own line, which draws the download as it goes.
+  // becomes the model's own line, which draws the download as it goes. A
+  // first one installs Podman before that, on the same line.
   function downloadLocal(recipe) {
     // A Spark cabled to this one: its setup asks for the other machine's password once, so it
     // runs in a terminal.
@@ -131,7 +169,7 @@ Panel {
       root.close()
       return
     }
-    Util.execArgv(["omarchy-agent-local", "use", "--detach", String(recipe.id)])
+    usage.setUp(recipe)
   }
 
   function linkTitle(link) {
@@ -151,7 +189,10 @@ Panel {
   }
 
   property double loadNowMs: Date.now()
-  readonly property bool localLoading: providers.some(function(p) { return p.localModel && ["activating", "deactivating", "removing"].indexOf(p.localModel.unit) >= 0 })
+  readonly property bool localLoading: providers.some(function(p) {
+    var model = p.localModel
+    return model && (["activating", "deactivating", "removing"].indexOf(model.unit) >= 0 || (model.install && model.install.phase === "dependencies"))
+  })
   Timer {
     interval: 250
     running: root.opened && root.localLoading
@@ -164,6 +205,15 @@ Panel {
   function deleteSelected() {
     var target = keyTarget
     if (!target || ["provider", "providerLaunch", "modelToggle", "modelLaunch", "modelPair", "modelDisconnect", "modelShare", "modelHeader", "localDownload"].indexOf(target.kind) < 0) return
+    var model = providers[target.index].localModel
+    // A setup the panel still owns has nothing on disk to delete, so it asks
+    // nothing: a failure is forgotten and one waiting its turn is dropped. The
+    // one starting can't be stopped midway through installing packages.
+    if (model && model.panelSetup) {
+      if (model.install.phase === "failed") usage.dismissSetupFailure()
+      else if (model.install.phase === "waiting") usage.unqueueSetup(model.recipe)
+      return
+    }
     deleteTarget = providers[target.index]
   }
 
@@ -536,8 +586,8 @@ Panel {
   }
 
   // Local AI offers the catalog's recipes that fit this machine and aren't
-  // set up yet, recommended first. Each downloads tens of GB, so setting one
-  // up runs in a terminal that shows its progress.
+  // set up yet, recommended first. Each downloads tens of GB in the
+  // background, its line here showing how far along it is.
   readonly property bool localFits: (usage.localRecipes || []).some(function(recipe) { return recipe && recipe.available })
   readonly property var localAddRecipes: {
     var models = usage.localModel && usage.localModel.models ? usage.localModel.models : {}
@@ -570,9 +620,8 @@ Panel {
 
   function setUpLocal(recipe) {
     if (!recipe) return
-    Util.execArgv(["omarchy-launch-floating-terminal-with-presentation", "omarchy-agent-local use " + Util.shellQuote(String(recipe.id))])
+    usage.setUp(recipe)
     cancelAdd()
-    root.close()
   }
   property string addStage: ""
   property string addProvider: ""
@@ -1306,6 +1355,9 @@ Panel {
 
   onOpenedChanged: if (!opened) {
     resetProviderDrag()
+    // A model paired here that starts after the panel closes doesn't move
+    // the cursor the next time it opens.
+    landAfterPair = ""
   } else {
     deleteTarget = null
     if (addStage !== "running") addStage = ""
@@ -1430,6 +1482,10 @@ Panel {
     owner: root
     bar: root.bar
     open: root.opened
+    // Pairing may bring up the SSH agent's prompt to approve a key, such as
+    // 1Password's, which has to take focus and clicks while the panel shows
+    // how the pairing goes.
+    yielding: usage.pairingId !== ""
     focusTarget: panel.loadedContent
     contentWidth: panel.fittedContentWidth(Style.space(380))
     contentHeight: panel.fittedContentHeight(panel.loadedContentHeight, Style.space(860))
@@ -1950,7 +2006,9 @@ Panel {
     // A first setup: downloading, or failed with its reason.
     readonly property bool installing: !!model && model.unit === "installing"
     readonly property var install: installing && model.install ? model.install : ({})
-    readonly property bool downloadShown: installing && install.phase !== "failed"
+    // Before the download, a first setup installs Podman to run it in.
+    readonly property bool preparing: installing && install.phase === "dependencies"
+    readonly property bool downloadShown: installing && !preparing && install.phase !== "failed"
     readonly property real totalBytes: Number(install.total_bytes) || 0
     readonly property real doneBytes: Number(install.done_bytes) || 0
     readonly property real rateBytes: Number(install.rate_bytes_s) || 0
@@ -2121,7 +2179,8 @@ Panel {
       }
 
       // A network model this machine isn't paired with yet: the play a local
-      // model starts with, which opens a terminal to pair over SSH.
+      // model starts with, which pairs over SSH. Greyed out while a pairing
+      // runs, as only one runs at a time.
       PanelActionButton {
         id: remotePair
         anchors.right: parent.right
@@ -2129,7 +2188,8 @@ Panel {
         visible: section.remote && !section.offline && !section.paired
         iconText: "󰐊"
         tooltipText: section.remote ? Commons.I18n.t("agents.networkPair").arg(section.model.host) : ""
-        foreground: root.foreground
+        foreground: usage.pairingId !== "" ? root.dim : root.foreground
+        opacity: usage.pairingId !== "" ? 0.5 : 1
         fontFamily: root.fontFamily
         hasCursor: root.hasKey("modelPair", section.providerIndex)
         onHasCursorChanged: if (hasCursor) root.revealItem(remotePair)
@@ -2216,7 +2276,7 @@ Panel {
     // time), or why it couldn't start. A network model shows its stats while
     // it runs instead: its memory is its host's business.
     Item {
-      visible: section.downloadShown || (section.running && !section.remote) || section.loadingShown || section.stoppingShown || section.removing
+      visible: section.preparing || section.downloadShown || (section.running && !section.remote) || section.loadingShown || section.stoppingShown || section.removing
       width: parent.width
       implicitHeight: Math.max(localMeterTitle.implicitHeight, localMeterValue.implicitHeight)
 
@@ -2225,7 +2285,8 @@ Panel {
         width: parent.width * 0.3
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.PlainText
-        text: section.downloadShown ? Commons.I18n.t("agents.localDownloadingMeter")
+        text: section.preparing ? Commons.I18n.t("agents.localInstallingMeter")
+          : section.downloadShown ? Commons.I18n.t("agents.localDownloadingMeter")
           : section.removing ? Commons.I18n.t("agents.localRemovingMeter")
           : section.loadingShown ? Commons.I18n.t("agents.localLoadingMeter")
           : section.stoppingShown ? Commons.I18n.t("agents.localStoppingMeter")
@@ -2240,7 +2301,8 @@ Panel {
         anchors.right: localMeterValue.left
         anchors.rightMargin: Style.space(20)
         anchors.verticalCenter: parent.verticalCenter
-        value: section.downloadShown ? (section.totalBytes > 0 ? section.doneBytes / section.totalBytes : 0)
+        value: section.preparing ? root.phaseProgress(section.elapsed, 30)
+          : section.downloadShown ? (section.totalBytes > 0 ? section.doneBytes / section.totalBytes : 0)
           : section.finishing !== "" ? 1 : section.loading || section.stopping || section.removing ? root.phaseProgress(section.elapsed, section.phaseSeconds)
           : section.ramTotal > 0 ? section.memory / section.ramTotal : 0
       }
@@ -2265,7 +2327,7 @@ Panel {
         textFormat: Text.PlainText
         horizontalAlignment: Text.AlignRight
         text: section.downloadShown ? root.downloadRate(section.rateBytes)
-          : section.loadingShown || section.stoppingShown || section.removing ? ""
+          : section.preparing || section.loadingShown || section.stoppingShown || section.removing ? ""
           : Commons.I18n.t("agents.localMemoryValue").arg(Commons.I18n.formatNumber(Math.round(section.memory)))
         color: root.dim
         font.family: root.fontFamily
@@ -2296,6 +2358,34 @@ Panel {
       font.family: root.fontFamily
       font.pixelSize: Style.font.bodySmall
       wrapMode: Text.Wrap
+    }
+
+    // A network model being paired, until it is or fails to be.
+    Text {
+      visible: section.remote && usage.pairingId === root.modelId(section.model)
+      width: parent.width
+      textFormat: Text.PlainText
+      text: section.remote ? Commons.I18n.t("agents.networkPairing").arg(section.model.host) : ""
+      color: root.dim
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.bodySmall
+      wrapMode: Text.Wrap
+    }
+
+    // Why pairing with a network model failed, which links to all that
+    // pairing printed.
+    TextLink {
+      readonly property var failure: section.remote ? root.pairFailure(section.model) : null
+      visible: failure !== null
+      width: Math.min(implicitWidth, parent.width)
+      text: !failure ? "" : failure.message !== "" ? failure.message : Commons.I18n.t("agents.networkPairFailed").arg(section.model.host)
+      idleColor: root.urgent
+      hotColor: root.urgent
+      font.pixelSize: Style.font.bodySmall
+      wrapMode: Text.Wrap
+      picked: root.hasKey("modelLogs", section.providerIndex)
+      tooltip: Commons.I18n.t("agents.networkPairOutputTip")
+      onClicked: root.showLocalLogs(section.model)
     }
 
     // Sharing that Tailscale refused, with the way to fix it.
