@@ -519,6 +519,137 @@ def configure_sddm_session(users):
     run(["chown", "-R", "sddm:sddm", "/var/lib/sddm"], check=False)
     run(["systemctl", "enable", "sddm.service"], check=False)
 
+def sync_keyboard_and_locale(users):
+    log("Sincronizando distribución de teclado e idioma del sistema...")
+    layout = "us"
+    variant = ""
+    model = "pc105"
+
+    # 1. Detectar desde localectl status
+    try:
+        res = subprocess.run(["localectl", "status"], capture_output=True, text=True, check=False)
+        for line in res.stdout.splitlines():
+            if "X11 Layout:" in line:
+                val = line.split(":", 1)[1].strip()
+                if val:
+                    layout = val
+            elif "X11 Variant:" in line:
+                variant = line.split(":", 1)[1].strip()
+            elif "VC Keymap:" in line and layout == "us":
+                vc = line.split(":", 1)[1].strip()
+                if vc:
+                    layout = vc
+    except Exception:
+        pass
+
+    # 2. Respaldo desde /etc/vconsole.conf
+    if os.path.exists("/etc/vconsole.conf"):
+        try:
+            with open("/etc/vconsole.conf") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("XKBLAYOUT="):
+                        layout = line.split("=", 1)[1].strip("'\"")
+                    elif line.startswith("XKBVARIANT="):
+                        variant = line.split("=", 1)[1].strip("'\"")
+                    elif line.startswith("KEYMAP=") and layout == "us":
+                        km = line.split("=", 1)[1].strip("'\"")
+                        if km:
+                            layout = km
+        except Exception:
+            pass
+
+    # 3. Respaldo desde /etc/default/keyboard
+    if os.path.exists("/etc/default/keyboard"):
+        try:
+            with open("/etc/default/keyboard") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("XKBLAYOUT="):
+                        layout = line.split("=", 1)[1].strip("'\"")
+                    elif line.startswith("XKBVARIANT="):
+                        variant = line.split("=", 1)[1].strip("'\"")
+        except Exception:
+            pass
+
+    log(f"Distribución de teclado detectada: layout='{layout}', variant='{variant}', model='{model}'")
+
+    # 4. Asegurar que /etc/vconsole.conf contenga XKBLAYOUT y XKBVARIANT para Omarchy
+    try:
+        vconsole_lines = []
+        if os.path.exists("/etc/vconsole.conf"):
+            with open("/etc/vconsole.conf") as f:
+                for line in f:
+                    k = line.strip().split("=")[0] if "=" in line else ""
+                    if k not in ("XKBLAYOUT", "XKBVARIANT", "XKBMODEL"):
+                        vconsole_lines.append(line.rstrip())
+        
+        vconsole_lines.append(f"XKBLAYOUT={layout}")
+        if variant:
+            vconsole_lines.append(f"XKBVARIANT={variant}")
+        vconsole_lines.append(f"XKBMODEL={model}")
+        
+        with open("/etc/vconsole.conf", "w") as f:
+            f.write("\n".join(vconsole_lines) + "\n")
+        os.chmod("/etc/vconsole.conf", 0o644)
+    except Exception as e:
+        log(f"Aviso al actualizar /etc/vconsole.conf: {e}", "33")
+
+    # 5. Generar perfiles de usuario y esqueleto
+    fcitx_text = f"""[Groups/0]
+# Group Name
+Name=Default
+# Layout
+Default Layout={layout}
+# Default Input Method
+DefaultIM=keyboard-{layout}
+
+[Groups/0/Items/0]
+# Name
+Name=keyboard-{layout}
+# Layout
+# Layout=
+
+[GroupOrder]
+0=Default
+"""
+
+    omarchy_kb_text = f"XKBLAYOUT={layout}\n"
+    if variant:
+        omarchy_kb_text += f"XKBVARIANT={variant}\n"
+
+    # /etc/skel
+    skel_omarchy = "/etc/skel/.config/omarchy"
+    skel_fcitx = "/etc/skel/.config/fcitx5"
+    os.makedirs(skel_omarchy, exist_ok=True)
+    os.makedirs(skel_fcitx, exist_ok=True)
+    with open(os.path.join(skel_omarchy, "keyboard-layouts"), "w") as f:
+        f.write(omarchy_kb_text)
+    with open(os.path.join(skel_fcitx, "profile"), "w") as f:
+        f.write(fcitx_text)
+
+    # Usuarios
+    for u in users:
+        try:
+            p = pwd.getpwnam(u)
+            home = p.pw_dir
+            if not os.path.isdir(home):
+                continue
+            
+            u_omarchy = os.path.join(home, ".config/omarchy")
+            u_fcitx = os.path.join(home, ".config/fcitx5")
+            os.makedirs(u_omarchy, exist_ok=True)
+            os.makedirs(u_fcitx, exist_ok=True)
+
+            with open(os.path.join(u_omarchy, "keyboard-layouts"), "w") as f:
+                f.write(omarchy_kb_text)
+            with open(os.path.join(u_fcitx, "profile"), "w") as f:
+                f.write(fcitx_text)
+
+            run(["chown", "-R", f"{p.pw_uid}:{p.pw_gid}", u_omarchy, u_fcitx], check=False)
+        except Exception as e:
+            log(f"Aviso al aplicar teclado para usuario {u}: {e}", "33")
+
 def main():
     parser = argparse.ArgumentParser(description="Instalador Oficial de X64 LIOS + Omarchy")
     parser.add_argument("--user", help="Usuario específico a configurar")
@@ -543,6 +674,7 @@ def main():
     setup_system_assets()
     silence_migrations(users)
     setup_user_configs(users, default_theme=args.theme)
+    sync_keyboard_and_locale(users)
     configure_sddm_session(users)
 
     log("=== ¡X64 LIOS + Omarchy instalado y configurado al 100% con éxito! ===", "32")
