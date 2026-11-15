@@ -39,9 +39,9 @@ BLACKLISTED_PKGS = {
 }
 
 CORE_UI_PKGS = [
-    'hyprland', 'uwsm', 'sddm', 'x64-sddm-theme', 'dolphin', 'ark',
-    'kitty', 'opencode', 'quickshell', 'swaybg', 'hyprlock', 'hypridle',
-    'hyprpolkitagent', 'hyprpwcenter', 'hyprpicker', 'hyprsunset',
+    'hyprland', 'uwsm', 'sddm', 'x64-sddm-theme',
+    'kitty', 'opencode', 'quickshell', 'hyprlock', 'hypridle',
+    'hyprpolkitagent', 'hyprpicker', 'hyprsunset',
     'gpu-screen-recorder', 'cliphist', 'adw-gtk-theme', 'xdg-terminal-exec',
     'xdg-desktop-portal-hyprland', 'socat', 'udiskie', 'wtype', 'wl-clipboard',
     'pamixer', 'brightnessctl', 'inotify-tools', 'bluez-tools', 'fcitx5',
