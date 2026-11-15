@@ -246,6 +246,25 @@ def setup_system_assets():
     if os.path.isdir(sess_dir):
         dest_sess = "/usr/share/wayland-sessions"
         os.makedirs(dest_sess, exist_ok=True)
+        # Limpiar sesiones redundantes o en conflicto en SDDM
+        for redundant in ["x64-lios-omarchy.desktop", "hyprland-uwsm.desktop"]:
+            r_path = os.path.join(dest_sess, redundant)
+            if os.path.exists(r_path):
+                try:
+                    os.remove(r_path)
+                except Exception:
+                    pass
+        # Ocultar hyprland.desktop en SDDM agregando NoDisplay=true (uwsm aún lo puede leer para ejecutar)
+        hypr_sess = os.path.join(dest_sess, "hyprland.desktop")
+        if os.path.exists(hypr_sess):
+            try:
+                with open(hypr_sess, "r") as f:
+                    c = f.read()
+                if "NoDisplay=true" not in c:
+                    with open(hypr_sess, "a") as f:
+                        f.write("\nNoDisplay=true\n")
+            except Exception:
+                pass
         for d in os.listdir(sess_dir):
             if d.endswith(".desktop"):
                 shutil.copy2(os.path.join(sess_dir, d), os.path.join(dest_sess, d))
