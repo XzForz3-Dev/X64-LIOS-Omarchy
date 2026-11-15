@@ -94,6 +94,10 @@ Item {
     themeOpacity = 1
     themeFinishing = false
     themeFallback.restart()
+    if (!backgroundActive && checked) {
+      framePoll.start()
+      if (!frameStatus.running) frameStatus.running = true
+    }
   }
 
   function revealTheme() {
@@ -126,8 +130,15 @@ Item {
   function finishTheme(token, cut) {
     if (token !== themeToken) return
     themeCut = !!cut
-    if (backgroundReady || !backgroundService) revealTheme()
-    else themeFinishing = true
+    if (backgroundReady || !backgroundService) {
+      revealTheme()
+    } else {
+      themeFinishing = true
+      if (!backgroundActive) {
+        framePoll.start()
+        if (!frameStatus.running) frameStatus.running = true
+      }
+    }
   }
 
   function themeStatus(token) {
@@ -220,7 +231,7 @@ Item {
 
   Timer {
     id: themeFallback
-    interval: 10000
+    interval: 1500
     onTriggered: root.revealTheme()
   }
 
