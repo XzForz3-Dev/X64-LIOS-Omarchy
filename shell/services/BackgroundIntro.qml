@@ -28,6 +28,11 @@ Item {
   property string themeColors: ""
   property string themeShell: ""
   property real themeOpacity: 1
+  // X64 LIOS: the media a background change is moving to. While it is set,
+  // the frame poll only reveals once OWE reports that path, so the previous
+  // looping video still playing under the cover cannot end the change before
+  // the link has moved.
+  property string themeExpectedPath: ""
   // A finished switch whose wallpaper is still hidden or decoding keeps its
   // cover until the wallpaper is on screen, so the fade never reveals a gap.
   property bool themeFinishing: false
@@ -76,7 +81,8 @@ Item {
     function onPluginsChanged() { root.finishStartup() }
   }
 
-  function prepareTheme(fromPath, token, colors, shell) {
+  function prepareTheme(fromPath, token, colors, shell, expectedPath) {
+    themeExpectedPath = expectedPath || ""
     framePoll.stop()
     themeFade.stop()
     themeCutReveal.stop()
@@ -113,6 +119,7 @@ Item {
     }
     cover = false
     themeToken = ""
+    themeExpectedPath = ""
     themeColors = ""
     themeShell = ""
     if (startupPending) {
@@ -166,6 +173,7 @@ Item {
     themeCutProgress = 0
     themeToken = ""
     transitionToken = ""
+    themeExpectedPath = ""
     themeBackground = ""
     themeColors = ""
     themeShell = ""
@@ -258,7 +266,8 @@ Item {
       if (exitCode !== 0 || token !== root.themeToken || (!token && !root.cover)) return
       try {
         var status = JSON.parse(frameStatusOut.text)
-        if (status.kind === "video" && status.ready && !status.has_transition && status.time_pos > 0)
+        if (status.kind === "video" && status.ready && !status.has_transition && status.time_pos > 0
+            && (!root.themeExpectedPath || status.path === root.themeExpectedPath))
           root.revealTheme()
       } catch (e) {}
     }

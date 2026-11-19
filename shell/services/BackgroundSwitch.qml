@@ -112,7 +112,9 @@ Item {
   }
 
   function cover(path) {
-    intro.prepareTheme(path, token, "", "")
+    // X64 LIOS: name the target so a looping video still playing under the
+    // cover is not mistaken for it.
+    intro.prepareTheme(path, token, "", "", still)
     advance()
   }
 
