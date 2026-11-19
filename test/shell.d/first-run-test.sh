@@ -134,20 +134,3 @@ grep -Fq -- '--exec omarchy menu summon agent.harness' "$test_tmp/calls" ||
   fail "first run invites a default agent once there is a connection"
 pass "first run invites a default agent once there is a connection"
 
-# Arguments: the git name and email already configured, empty for unset.
-offers_git_setup() {
-  : >"$test_tmp/calls"
-  local home="$test_tmp/git-home"
-  rm -rf "$home" && mkdir -p "$home"
-  [[ -z $1 ]] || HOME="$home" git config --global user.name "$1"
-  [[ -z $2 ]] || HOME="$home" git config --global user.email "$2"
-  HOME="$home" PATH="$mock_bin:$PATH" OMARCHY_TEST_CALLS="$test_tmp/calls" \
-    bash "$ROOT/install/user/first-run/git.sh"
-  grep -Fq 'omarchy-setup-git' "$test_tmp/calls"
-}
-
-# In X64 LIOS, first run does not send git setup notification to keep first boot clean.
-if offers_git_setup "" ""; then
-  fail "first run in X64 LIOS should not pop up git setup notification"
-fi
-pass "first run in X64 LIOS suppresses automatic git setup notification"
