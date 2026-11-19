@@ -14,8 +14,6 @@ bluez-utils
 bolt
 brightnessctl
 btop
-cards
-checkmate
 cliamp
 cmake
 crun
@@ -33,6 +31,7 @@ exfatprogs
 expac
 eza
 fakeroot
+fantasi
 fastfetch
 fcitx5
 fcitx5-chewing
@@ -49,6 +48,7 @@ folio
 fontconfig
 foot
 fzf
+ghostscript
 git
 gliff
 gnome-keyring
@@ -107,6 +107,7 @@ omarchy-local-ai
 omarchy-power-profiles-daemon
 omarchy-screensaver
 omarchy-speedtest
+omarchy-themes-intros
 omasnap
 # OWE owns desktop video backgrounds and feeds the lock screen its frames.
 owe
