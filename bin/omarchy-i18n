@@ -74,6 +74,11 @@ language_catalog=$i18n/$language/cli.json
 [[ -f $language_catalog ]] || language_catalog=/dev/null
 english_catalog=$i18n/en/cli.json
 [[ -f $english_catalog ]] || english_catalog=/dev/null
+# X64 LIOS: isolated override catalog so upstream en/es-MX cli.json stay 100% conflict-free
+x64_language_catalog=$i18n/x64/$language.json
+[[ -f $x64_language_catalog ]] || x64_language_catalog=/dev/null
+x64_english_catalog=$i18n/x64/en.json
+[[ -f $x64_english_catalog ]] || x64_english_catalog=/dev/null
 registry=$i18n/locales.json
 [[ -f $registry ]] || registry=/dev/null
 
@@ -84,11 +89,15 @@ registry=$i18n/locales.json
 parts=()
 mapfile -d '' parts < <(jq -j -n -L "$i18n" \
   --arg key "$key" --arg language "$language" --argjson count "$count" \
-  --slurpfile lang "$language_catalog" --slurpfile en "$english_catalog" --slurpfile registry "$registry" '
+  --slurpfile lang "$language_catalog" --slurpfile en "$english_catalog" \
+  --slurpfile x64_lang "$x64_language_catalog" --slurpfile x64_en "$x64_english_catalog" \
+  --slurpfile registry "$registry" '
   include "plural";
   def present: . != null and . != "";
-  ($lang[0] // {}) as $l | ($en[0] // {}) as $e | ($registry[0][$language] // {}) as $r
-  | (if ($l[$key] | present) then [$l[$key], $language]
+  ($x64_lang[0] // {}) as $xl | ($lang[0] // {}) as $l | ($x64_en[0] // {}) as $xe | ($en[0] // {}) as $e | ($registry[0][$language] // {}) as $r
+  | (if ($xl[$key] | present) then [$xl[$key], $language]
+     elif ($l[$key] | present) then [$l[$key], $language]
+     elif ($xe[$key] | present) then [$xe[$key], "en"]
      elif ($e[$key] | present) then [$e[$key], "en"]
      else [$key, "en"] end) as [$entry, $from]
   | (if $count == null then (if ($entry | type) == "object" then $entry.other else $entry end)

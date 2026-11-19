@@ -443,6 +443,38 @@ def silence_migrations(users):
         except Exception:
             pass
 
+def ensure_x64_menu_override(menu_ext_path):
+    """Inyecta el branding X64 LIOS + Omarchy en la extensión del menú sin tocar archivos upstream."""
+    entry_line = '  "update.omarchy": {"icon":"󰣇","label":"X64 LIOS + Omarchy","action":"omarchy-launch-floating-terminal-with-presentation omarchy-update"}'
+    os.makedirs(os.path.dirname(menu_ext_path), exist_ok=True)
+    if not os.path.exists(menu_ext_path):
+        with open(menu_ext_path, "w", encoding="utf-8") as f:
+            f.write("{\n  // X64 LIOS Official Menu Override\n" + entry_line + "\n}\n")
+        return
+
+    with open(menu_ext_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    if '"update.omarchy"' in content:
+        return
+
+    idx = content.rfind("}")
+    if idx == -1:
+        return
+
+    prefix = content[:idx].rstrip()
+    # Verificar si ya hay alguna propiedad JSON real antes del cierre (excluyendo comentarios //)
+    non_comment_lines = [
+        ln.strip() for ln in prefix.splitlines()
+        if ln.strip() and not ln.strip().startswith("//")
+    ]
+    needs_comma = len(non_comment_lines) > 1 and not non_comment_lines[-1].endswith((",", "{"))
+    sep = ",\n" if needs_comma else "\n"
+    updated = prefix + sep + "\n  // X64 LIOS Official Menu Override\n" + entry_line + "\n" + content[idx:]
+    with open(menu_ext_path, "w", encoding="utf-8") as f:
+        f.write(updated)
+
+
 def setup_user_configs(users, default_theme="x64-lios-crimson"):
     log("Configurando carpetas de usuario, accesos de personalización y tema...")
     
@@ -460,6 +492,7 @@ def setup_user_configs(users, default_theme="x64-lios-crimson"):
                 shutil.copytree(src_item, dst_item, dirs_exist_ok=True)
             else:
                 shutil.copy2(src_item, dst_item)
+    ensure_x64_menu_override("/etc/skel/.config/omarchy/extensions/omarchy-menu.jsonc")
 
     for u in users:
         try:
@@ -490,6 +523,7 @@ def setup_user_configs(users, default_theme="x64-lios-crimson"):
                         shutil.copytree(src_item, dst_item, dirs_exist_ok=True)
                     else:
                         shutil.copy2(src_item, dst_item)
+            ensure_x64_menu_override(os.path.join(home, ".config/omarchy/extensions/omarchy-menu.jsonc"))
 
             # Permisos
             run(["chown", "-R", f"{p.pw_uid}:{p.pw_gid}", 
