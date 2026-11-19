@@ -475,6 +475,20 @@ def ensure_x64_menu_override(menu_ext_path):
         f.write(updated)
 
 
+def ensure_x64_launcher_overrides(apps_dir):
+    """Oculta entradas X64 globales duplicadas en Omarchy (sin tocar launcher.hides upstream)."""
+    os.makedirs(apps_dir, exist_ok=True)
+    opencode_override = os.path.join(apps_dir, "opencode.desktop")
+    with open(opencode_override, "w", encoding="utf-8") as f:
+        f.write(
+            "# X64 LIOS Omarchy override (Omarchy provides native omarchy-agent-opencode.desktop)\n"
+            "[Desktop Entry]\n"
+            "Type=Application\n"
+            "Name=OpenCode AI\n"
+            "NoDisplay=true\n"
+        )
+
+
 def setup_user_configs(users, default_theme="x64-lios-crimson"):
     log("Configurando carpetas de usuario, accesos de personalización y tema...")
     
@@ -493,6 +507,7 @@ def setup_user_configs(users, default_theme="x64-lios-crimson"):
             else:
                 shutil.copy2(src_item, dst_item)
     ensure_x64_menu_override("/etc/skel/.config/omarchy/extensions/omarchy-menu.jsonc")
+    ensure_x64_launcher_overrides("/etc/skel/.local/share/applications")
 
     for u in users:
         try:
@@ -524,10 +539,12 @@ def setup_user_configs(users, default_theme="x64-lios-crimson"):
                     else:
                         shutil.copy2(src_item, dst_item)
             ensure_x64_menu_override(os.path.join(home, ".config/omarchy/extensions/omarchy-menu.jsonc"))
+            ensure_x64_launcher_overrides(os.path.join(home, ".local/share/applications"))
 
             # Permisos
             run(["chown", "-R", f"{p.pw_uid}:{p.pw_gid}", 
                  os.path.join(home, ".config"), 
+                 os.path.join(home, ".local/share/applications"),
                  os.path.join(home, "Fondos"), 
                  os.path.join(home, "Temas")], check=False)
 
