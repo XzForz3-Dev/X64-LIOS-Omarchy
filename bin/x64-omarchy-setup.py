@@ -548,15 +548,27 @@ def setup_user_configs(users, default_theme="x64-lios-crimson"):
                  os.path.join(home, "Fondos"), 
                  os.path.join(home, "Temas")], check=False)
 
-            # Aplicar tema por defecto para el usuario
-            env = os.environ.copy()
-            env["HOME"] = home
-            env["USER"] = u
-            env["OMARCHY_PATH"] = OMARCHY_DIR
-            env["OMARCHY_THEME_HEADLESS"] = "1"
-            run(["sudo", "-u", u, "bash", "-c", 
-                 f"export OMARCHY_PATH=/usr/share/omarchy && export OMARCHY_THEME_HEADLESS=1 && /usr/share/omarchy/bin/omarchy-theme-set '{default_theme}'"], 
-                check=False, env=env)
+            # Aplicar tema por defecto solo si el usuario aún no tiene un tema activo (evita pisar personalizaciones o dejar fondo negro en actualizaciones)
+            theme_name_file = os.path.join(home, ".local/state/omarchy/current/theme.name")
+            has_existing_theme = False
+            if os.path.isfile(theme_name_file):
+                try:
+                    with open(theme_name_file, "r", encoding="utf-8") as tf:
+                        has_existing_theme = bool(tf.read().strip())
+                except Exception:
+                    has_existing_theme = False
+
+            if not has_existing_theme:
+                env = os.environ.copy()
+                env["HOME"] = home
+                env["USER"] = u
+                env["OMARCHY_PATH"] = OMARCHY_DIR
+                env["OMARCHY_THEME_HEADLESS"] = "1"
+                run(["sudo", "-u", u, "bash", "-c",
+                     f"export OMARCHY_PATH=/usr/share/omarchy && export OMARCHY_THEME_HEADLESS=1 && /usr/share/omarchy/bin/omarchy-theme-set '{default_theme}'"],
+                    check=False, env=env)
+            else:
+                log(f"Tema existente preservado para {u} (sin sobrescribir sesión activa).")
         except Exception as e:
             log(f"Aviso al configurar usuario {u}: {e}", "33")
 
