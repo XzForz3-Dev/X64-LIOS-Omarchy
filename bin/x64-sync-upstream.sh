@@ -38,7 +38,7 @@ if [ "$LOCAL_UPSTREAM_COMMIT" = "$REMOTE_UPSTREAM_COMMIT" ]; then
 fi
 
 echo -e "\033[1;32m[!] Se detectaron commits nuevos en Basecamp:\033[0m"
-git log --oneline "$LOCAL_UPSTREAM_COMMIT..$REMOTE_UPSTREAM_COMMIT" | head -n 15
+git log --oneline -n 15 "$LOCAL_UPSTREAM_COMMIT..$REMOTE_UPSTREAM_COMMIT"
 
 # 3. Escaneo preventivo de paquetes en lista negra
 echo -e "\n\033[1;33m[+] Ejecutando filtro de seguridad de paquetes (Blacklist Check)...\033[0m"
@@ -96,10 +96,14 @@ if git merge refs/heads/upstream -m "chore(sync): automated merge from upstream 
     # Asegurar permisos de scripts
     chmod +x bin/* 2>/dev/null || true
     
-    # Subir a GitHub si hay credenciales y permisos
-    echo -e "\n\033[1;33m[+] Sincronizando con GitHub (XzForz3-Dev/X64-LIOS-Omarchy)...\033[0m"
-    git push origin upstream 2>/dev/null || true
-    git push origin "$TARGET_BRANCH" 2>/dev/null || true
+    # Subir a GitHub (falla con error real si el token no tiene permisos, nunca falsos verdes)
+    if git remote get-url origin >/dev/null 2>&1; then
+        echo -e "\n\033[1;33m[+] Sincronizando con GitHub (XzForz3-Dev/X64-LIOS-Omarchy)...\033[0m"
+        if ! git push origin upstream || ! git push origin "$TARGET_BRANCH"; then
+            echo -e "\033[1;31m[X] Error al subir a GitHub. Si upstream modificó .github/workflows/, asegúrate de configurar el secret SYNC_TOKEN (Contents + Workflows).\033[0m"
+            exit 1
+        fi
+    fi
     echo -e "\033[1;32m[✓] ¡Sincronización completada exitosamente! X64 LIOS + Omarchy está al día.\033[0m"
 else
     echo -e "\033[1;31m[!] Conflicto detectado durante la fusión. Abortando merge automático para proteger producción...\033[0m"

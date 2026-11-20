@@ -39,7 +39,6 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.repository == 'basecamp/omarchy'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:

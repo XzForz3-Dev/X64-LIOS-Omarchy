@@ -19,7 +19,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Verificar modo de autenticación Sync
+        env:
+          HAS_SYNC_TOKEN: ${{ secrets.SYNC_TOKEN != '' }}
+        run: |
+          if [ "$HAS_SYNC_TOKEN" = "true" ]; then
+            echo "[✓] Usando SYNC_TOKEN (permisos completos Contents + Workflows: 100% automático)."
+          else
+            echo "[i] Usando GITHUB_TOKEN por defecto (añade el secret SYNC_TOKEN para sincronizar también cambios en .github/workflows/)."
+          fi
 
       - name: Configurar Identidad Git
         run: |
